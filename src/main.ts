@@ -211,7 +211,7 @@ class Board {
         this.filled = new Map();
     }
 
-    fill(ps, marker) {
+    fill(ps:Point[], marker:string) {
         const eps = ps.map(encode);
 
         for (let ep of eps) {
@@ -266,16 +266,19 @@ const board = new Board(board_points);
 const start = performance.now();
 let counter = 0;
 
+const verbose = false;
+
 function logBoard() {
     console.log(convert_to_strings(board_points, (p) => board.at(p) || " ").join('\n'));
 }
 
-function find_solution(ss = 0, bs = 0) {
+function find_solution(ss = 0) {
     for (let si = ss; si < shapes.length; si++) {
         const shape = shapes[si];
 
         let placed = false;
-        for (let bi = bs; bi < board_points.length; bi++) {
+        let places = 0;
+        for (let bi = 0; bi < board_points.length; bi++) {
             const bp = board_points[bi];
 
             if (board.check(bp)) {
@@ -292,12 +295,13 @@ function find_solution(ss = 0, bs = 0) {
                     if (remove) {
                         // console.log("placed piece: " + si);
                         placed = true;
+                        places++;
 
                         if (board.check(bp)) {
                             throw new Error("mistake!");
                         }
 
-                        const found = find_solution(si + 1, bi + 1);
+                        const found = find_solution(si + 1);
                         if (found) {
                             return found; // unwind recursion
                         } else {
@@ -310,16 +314,26 @@ function find_solution(ss = 0, bs = 0) {
         }
 
         if (!placed) {
-            console.log("failed to place: ");
-            console.log(vshapes[si].points.join("\n"));
-            console.log("into");
-            logBoard();
+            if (verbose && places === 0) {
+                console.log("failed to place: ");
+                console.log(vshapes[si].points.join("\n"));
+                console.log("into");
+                logBoard();
+                console.log("--------")
+            }
             return false;
         }
      }
 
     return true;
 }
+
+board.fill([{x: 1, y: 0}], "M"); // Feb
+board.fill([{x: 3, y: 5}], "D"); // 25
+board.fill([{x: 3, y: 6}], "W"); // Sun
+
+console.log("Solving for:");
+logBoard();
 
 if (find_solution()) {
     console.log("solution:");
