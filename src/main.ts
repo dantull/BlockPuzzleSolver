@@ -200,10 +200,6 @@ const board_points = convert_to_points(vboard);
 const start = performance.now();
 let counter = 0;
 
-function logBoard(board:Board) {
-    console.log(convert_to_strings(board_points, (p) => board.at(p) || " ").join('\n'));
-}
-
 const board = new Board(board_points);
 
 function find_solutions(ss = 0, solution_callback:(b:Board) => boolean, deadend_callback:(b:Board, s:Shape) => boolean):boolean {
@@ -253,6 +249,10 @@ function find_solutions(ss = 0, solution_callback:(b:Board) => boolean, deadend_
 board.fill([{x: 1, y: 0}], "M"); // Feb
 board.fill([{x: 3, y: 5}], "D"); // 25
 board.fill([{x: 3, y: 6}], "W"); // Sun
+
+function logBoard(board:Board) {
+    console.log(convert_to_strings(board_points, (p) => board.at(p) || " ").join('\n'));
+}
 
 console.log("Solving for:");
 logBoard(board);
