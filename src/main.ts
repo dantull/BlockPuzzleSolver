@@ -1,7 +1,7 @@
 // 10 unique pieces, some of which differ when flipped (chirality)
 // and rotated (usually 4 shapes, but tetra I only has 2)
 
-import { Point, Shape, VisualShape } from "./types";
+import { VisualShape } from "./types";
 import { Board } from "./board"
 import { convert_to_shape, convert_to_strings, convert_to_points } from "./stringify";
 import { create_solver, Solver } from "./solver";
