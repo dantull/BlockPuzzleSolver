@@ -200,15 +200,13 @@ const board_points = convert_to_points(vboard);
 const start = performance.now();
 let counter = 0;
 
-const verbose = false;
-
 function logBoard(board:Board) {
     console.log(convert_to_strings(board_points, (p) => board.at(p) || " ").join('\n'));
 }
 
 const board = new Board(board_points);
 
-function find_solutions(ss = 0, callback:(b:Board) => boolean):boolean {
+function find_solutions(ss = 0, solution_callback:(b:Board) => boolean, deadend_callback:(b:Board, s:Shape) => boolean):boolean {
     for (let si = ss; si < shapes.length; si++) {
         const shape = shapes[si];
 
@@ -233,7 +231,7 @@ function find_solutions(ss = 0, callback:(b:Board) => boolean):boolean {
                         placed = true;
                         places++;
 
-                        const halt = find_solutions(si + 1, callback);
+                        const halt = find_solutions(si + 1, solution_callback, deadend_callback);
                         if (halt) {
                             return halt; // unwind recursion
                         } else {
@@ -246,18 +244,14 @@ function find_solutions(ss = 0, callback:(b:Board) => boolean):boolean {
         }
 
         if (!placed) {
-            if (verbose && places === 0) {
-                console.log("failed to place: ");
-                console.log(vshapes[si].points.join("\n"));
-                console.log("into");
-                logBoard(board);
-                console.log("--------")
+            if (places === 0) {
+                return deadend_callback(board, shape);
             }
             return false;
         }
      }
 
-    return callback(board);
+    return solution_callback(board);
 }
 
 board.fill([{x: 1, y: 0}], "M"); // Feb
@@ -267,6 +261,8 @@ board.fill([{x: 3, y: 6}], "W"); // Sun
 console.log("Solving for:");
 logBoard(board);
 
+const verbose = false;
+
 find_solutions(0, (board) => {
     console.log("solution:");
     logBoard(board);
@@ -274,6 +270,15 @@ find_solutions(0, (board) => {
 
     // return false; // do not stop, keep finding more solutions
     return true; // stop at the first solution
+}, (board, s) => {
+    if (verbose) {
+        console.log("failed to place: ");
+        console.log(convert_to_strings(s.points, (p) => "O").join('\n'));
+        console.log("into");
+        logBoard(board);
+        console.log("--------")
+    }
+    return false; // always continue
 });
 
 /*
