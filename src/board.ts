@@ -7,6 +7,7 @@ function encode(p:Point): string {
 export class Board {
     private filled:Map<string, string>;
     private unfilled:Set<string>;
+    private all:Point[];
 
     constructor(ps:Point[]) {
         this.unfilled = new Set();
@@ -15,6 +16,7 @@ export class Board {
         }
         
         this.filled = new Map();
+        this.all = ps;
     }
 
     fill(ps:Point[], marker:string) {
@@ -51,5 +53,7 @@ export class Board {
     left() {
         return this.unfilled.size;
     }
+    points() {
+        return this.all;
+    }
 }
-

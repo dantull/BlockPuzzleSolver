@@ -212,9 +212,7 @@ function find_solutions(ss = 0, solution_callback:(b:Board) => boolean, deadend_
 
         let placed = false;
         let places = 0;
-        for (let bi = 0; bi < board_points.length; bi++) {
-            const bp = board_points[bi];
-
+        for (let bp of board.points()) {
             if (board.check(bp)) {
                 const vs = variants(shape, bp);
 
