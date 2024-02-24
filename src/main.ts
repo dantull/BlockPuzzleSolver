@@ -1,14 +1,7 @@
 // 10 unique pieces, some of which differ when flipped (chirality)
 // and rotated (usually 4 shapes, but tetra I only has 2)
 
-type ShapeAttrs = {
-    chiral: boolean, // whether the piece differs when mirrored
-    rotations: 1 | 3, // the I/Z only have 2 (90 degree) alternate, all others have 3 alternates  
-};
-
-type VisualShape = {
-    points: string[]
-} & ShapeAttrs;
+import { Point, Shape, VisualShape } from "./types";
 
 const vshapes: VisualShape[] = [
     {   // tetra I
@@ -86,10 +79,17 @@ const vshapes: VisualShape[] = [
     ]},
 ];
 
-type Point = { x: number, y: number}
-type Shape = {
-    points: Point[] // array of points  
-} & ShapeAttrs;
+// Board is shaped like this:
+const vboard: string[] = [
+    "MMMMMM",
+    "MMMMMM",
+    "DDDDDDD",
+    "DDDDDDD",
+    "DDDDDDD",
+    "DDDDDDD",
+    "DDDWWWW",
+    "    WWW"
+];
 
 function convert_to_points(shape: string[]): Point[] {
     const points = [];
@@ -112,8 +112,6 @@ function bounds(ps: Point[]): [Point, Point] {
     const maxY = ps.reduce((m:number, p) => Math.max(m, p.y), Number.NEGATIVE_INFINITY);
     return [{x:minX, y:minY}, {x:maxX, y:maxY}];
 }
-
-
 
 function convert_to_strings(ps:Point[], to_char:(p:Point) => string): string[] {
     const [min, max] = bounds(ps);
@@ -139,18 +137,6 @@ function convert_to_shape(vs: VisualShape): Shape {
         points: convert_to_points(vs.points)
     }
 }
-
-// Board is shaped like this:
-const vboard: string[] = [
-    "MMMMMM",
-    "MMMMMM",
-    "DDDDDDD",
-    "DDDDDDD",
-    "DDDDDDD",
-    "DDDDDDD",
-    "DDDWWWW",
-    "    WWW"
-];
 
 // where M is month, D is a day (number),
 // W is a day of the week, and " " is obstructed
