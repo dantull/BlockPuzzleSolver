@@ -49,16 +49,20 @@ function variants(s: Shape, at: Point): Point[][] {
 // 6. If all pieces are used, stop and report the solution that was found.
 // 7. Exhaustive mode could continue to find solutions.
 
-export type Solver = (solution_callback:(b:Board) => boolean, deadend_callback:(b:Board, s:Shape) => boolean) => boolean
+export type Solver = (solution_callback:(pi:PointInspector) => boolean, deadend_callback:(pi:PointInspector, s:Shape) => boolean) => boolean
+export type PointInspector = (p:Point) => string
+export type Setter = (p:Point, m:string) => void
 
-export function create_solver(board_points: Point[], shapes: Shape[], setup_callback:(b:Board) => void):Solver {
+export function create_solver(board_points: Point[], shapes: Shape[], setup_callback:((s:Setter, pi:PointInspector) => void)):Solver {
     let counter = 0;
 
     const board = new Board(board_points);
 
-    setup_callback(board);
+    setup_callback((p, m) => {
+        board.fill([p], m);
+    }, (p) => board.at(p));
     
-    function find_solutions(ss = 0, solution_callback:(b:Board) => boolean, deadend_callback:(b:Board, s:Shape) => boolean):boolean {
+    function find_solutions(ss = 0, solution_callback:(pi:PointInspector) => boolean, deadend_callback:(pi:PointInspector, s:Shape) => boolean):boolean {
         for (let si = ss; si < shapes.length; si++) {
             const shape = shapes[si];
 
@@ -93,13 +97,13 @@ export function create_solver(board_points: Point[], shapes: Shape[], setup_call
 
             if (!placed) {
                 if (places === 0) {
-                    return deadend_callback(board, shape);
+                    return deadend_callback((p) => board.at(p), shape);
                 }
                 return false;
             }
         }
 
-        return solution_callback(board);
+        return solution_callback((p) => board.at(p));
     }
 
     return (sln_cb, de_cb) => {

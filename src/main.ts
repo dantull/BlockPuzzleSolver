@@ -2,9 +2,8 @@
 // and rotated (usually 4 shapes, but tetra I only has 2)
 
 import { VisualShape } from "./types";
-import { Board } from "./board"
 import { convert_to_shape, convert_to_strings, convert_to_points } from "./stringify";
-import { create_solver, Solver } from "./solver";
+import { create_solver, PointInspector, Solver } from "./solver";
 
 const vshapes: VisualShape[] = [
     {   // tetra I
@@ -107,34 +106,34 @@ const board_points = convert_to_points(vboard);
 
 const start = performance.now();
 
-function logBoard(board:Board) {
-    console.log(convert_to_strings(board_points, (p) => board.at(p) || " ").join('\n'));
+function logBoard(pi:PointInspector) {
+    console.log(convert_to_strings(board_points, (p) => pi(p) || " ").join('\n'));
 }
 
 const verbose = false;
 
-const solver:Solver = create_solver(board_points, shapes, (board) => {
-    board.fill([{x: 1, y: 0}], "M"); // Feb
-    board.fill([{x: 3, y: 5}], "D"); // 25
-    board.fill([{x: 3, y: 6}], "W"); // Sun
+const solver:Solver = create_solver(board_points, shapes, (set, pi) => {
+    set({x: 1, y: 0}, "M"); // Feb
+    set({x: 3, y: 5}, "D"); // 25
+    set({x: 3, y: 6}, "W"); // Sun
 
     console.log("Solving for:");
-    logBoard(board);
+    logBoard(pi);
 });
 
-solver((board) => {
+solver((pi) => {
     console.log("solution:");
-    logBoard(board);
+    logBoard(pi);
     console.log("elapsed time: " + ((performance.now() - start) / 1000));
 
     // return false; // do not stop, keep finding more solutions
     return true; // stop at the first solution
-}, (board, s) => {
+}, (pi, s) => {
     if (verbose) {
         console.log("failed to place: ");
         console.log(convert_to_strings(s.points, (p) => "O").join('\n'));
         console.log("into");
-        logBoard(board);
+        logBoard(pi);
         console.log("--------")
     }
     return false; // always continue
