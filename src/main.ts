@@ -140,17 +140,4 @@ solver((board) => {
     return false; // always continue
 });
 
-/*
-// dump all shape variations visually
-for (let shape of shapes) {
-    const vs = variants(shape, {x: 0, y: 0});
-    const vs_as_strings = vs.map((v) => convert_to_strings(v, (_) => "o"));
-    console.log(vs_as_strings.map((sa) => sa.join("\n")).join("\n\n"));
-    console.log("\n-----\n");
-}
-
-// dump the board back out
-console.log(convert_to_strings(board_points, (_) => "o").join('\n'));
-*/
-
 //# sourceMappingURL=main.js.map
