@@ -164,9 +164,11 @@ function flip(ps: Point[]): Point[] {
 }
 
 // negative 0 is weird, avoid it
-const neg = (x) => x === 0 ? x : -x;
+const neg = (x:number) => x === 0 ? x : -x;
 
-const rotate_fns = [
+type PointMapper = (p:Point) => Point
+
+const rotate_fns: PointMapper[] = [
     ({x, y}) => ({x: neg(y), y: x}), // 90 degrees
     ({x, y}) => ({x: neg(x), y: -y}), // 180 degrees
     ({x, y}) => ({x: y, y: neg(x)}) // 270 degrees
@@ -231,7 +233,7 @@ class Board {
             }
         };
     }
-    at(p) {
+    at(p:Point) {
         const ep = encode(p);
         if (this.unfilled.has(ep)) {
             return "."; // fillable square
@@ -239,7 +241,7 @@ class Board {
 
         return this.filled.get(encode(p)) || ' ';
     }
-    check(p) {
+    check(p:Point) {
         return this.unfilled.has(encode(p));
     }
     left() {
@@ -266,13 +268,13 @@ let counter = 0;
 
 const verbose = false;
 
-function logBoard(board) {
+function logBoard(board:Board) {
     console.log(convert_to_strings(board_points, (p) => board.at(p) || " ").join('\n'));
 }
 
 const board = new Board(board_points);
 
-function find_solutions(ss = 0, callback:(b:Board) => boolean) {
+function find_solutions(ss = 0, callback:(b:Board) => boolean):boolean {
     for (let si = ss; si < shapes.length; si++) {
         const shape = shapes[si];
 
