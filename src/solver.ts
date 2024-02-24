@@ -80,7 +80,6 @@ export function create_solver(board_points: Point[], shapes: Shape[], setup_call
                         console.log(counter / 1000000);
                     }
                     if (remove) {
-                        // console.log("placed piece: " + si);
                         placed = true;
                         places++;
 
