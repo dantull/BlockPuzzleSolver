@@ -212,30 +212,28 @@ function find_solutions(ss = 0, solution_callback:(b:Board) => boolean, deadend_
 
         let placed = false;
         let places = 0;
-        for (let bp of board.points()) {
-            if (board.check(bp)) {
-                const vs = variants(shape, bp);
+        for (let bp of board.remaining()) {
+            const vs = variants(shape, bp);
 
-                for (let vi = 0; vi < vs.length; vi++) {
-                    const v = vs[vi];
-                    const remove = board.fill(v, si + "");
-                    counter++;
+            for (let vi = 0; vi < vs.length; vi++) {
+                const v = vs[vi];
+                const remove = board.fill(v, si + "");
+                counter++;
 
-                    if (counter % 1000000 === 0) {
-                        console.log(counter / 1000000);
-                    }
-                    if (remove) {
-                        // console.log("placed piece: " + si);
-                        placed = true;
-                        places++;
+                if (counter % 1000000 === 0) {
+                    console.log(counter / 1000000);
+                }
+                if (remove) {
+                    // console.log("placed piece: " + si);
+                    placed = true;
+                    places++;
 
-                        const halt = find_solutions(si + 1, solution_callback, deadend_callback);
-                        if (halt) {
-                            return halt; // unwind recursion
-                        } else {
-                            placed = false;
-                            remove(); // continue
-                        }
+                    const halt = find_solutions(si + 1, solution_callback, deadend_callback);
+                    if (halt) {
+                        return halt; // unwind recursion
+                    } else {
+                        placed = false;
+                        remove(); // continue
                     }
                 }
             }

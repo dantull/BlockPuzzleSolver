@@ -53,7 +53,7 @@ export class Board {
     left() {
         return this.unfilled.size;
     }
-    points() {
-        return this.all;
+    remaining() {
+        return this.all.filter((p) => this.unfilled.has(encode(p)));
     }
 }
