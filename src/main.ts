@@ -261,18 +261,18 @@ class Board {
 const shapes = vshapes.map(convert_to_shape);
 const board_points = convert_to_points(vboard);
 
-const board = new Board(board_points);
-
 const start = performance.now();
 let counter = 0;
 
 const verbose = false;
 
-function logBoard() {
+function logBoard(board) {
     console.log(convert_to_strings(board_points, (p) => board.at(p) || " ").join('\n'));
 }
 
-function find_solution(ss = 0) {
+const board = new Board(board_points);
+
+function find_solutions(ss = 0, callback:(b:Board) => boolean) {
     for (let si = ss; si < shapes.length; si++) {
         const shape = shapes[si];
 
@@ -297,13 +297,9 @@ function find_solution(ss = 0) {
                         placed = true;
                         places++;
 
-                        if (board.check(bp)) {
-                            throw new Error("mistake!");
-                        }
-
-                        const found = find_solution(si + 1);
-                        if (found) {
-                            return found; // unwind recursion
+                        const halt = find_solutions(si + 1, callback);
+                        if (halt) {
+                            return halt; // unwind recursion
                         } else {
                             placed = false;
                             remove(); // continue
@@ -318,14 +314,14 @@ function find_solution(ss = 0) {
                 console.log("failed to place: ");
                 console.log(vshapes[si].points.join("\n"));
                 console.log("into");
-                logBoard();
+                logBoard(board);
                 console.log("--------")
             }
             return false;
         }
      }
 
-    return true;
+    return callback(board);
 }
 
 board.fill([{x: 1, y: 0}], "M"); // Feb
@@ -333,13 +329,16 @@ board.fill([{x: 3, y: 5}], "D"); // 25
 board.fill([{x: 3, y: 6}], "W"); // Sun
 
 console.log("Solving for:");
-logBoard();
+logBoard(board);
 
-if (find_solution()) {
+find_solutions(0, (board) => {
     console.log("solution:");
-    logBoard();
+    logBoard(board);
     console.log("elapsed time: " + ((performance.now() - start) / 1000));
-}
+
+    // return false; // do not stop, keep finding more solutions
+    return true; // stop at the first solution
+});
 
 /*
 // dump all shape variations visually
