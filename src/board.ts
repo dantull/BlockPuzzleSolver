@@ -1,4 +1,4 @@
-import { Point } from "./types";
+import { Point } from "./geometry";
 
 function encode(p:Point): string {
     return p.x + "_" + p.y;

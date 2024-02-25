@@ -1,7 +1,7 @@
-import { Point, Shape, VisualShape } from "./types";
+import { Point, Shape, VisualShape } from "./geometry";
 
 export function convert_to_points(shape: string[]): Point[] {
-    const points = [];
+    const points:Point[] = [];
     for (var y = 0; y < shape.length; y++) {
         const line = shape[y];
         for (var x = 0; x < line.length; x++) {

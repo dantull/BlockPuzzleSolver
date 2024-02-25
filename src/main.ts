@@ -1,9 +1,9 @@
 // 10 unique pieces, some of which differ when flipped (chirality)
 // and rotated (usually 4 shapes, but tetra I only has 2)
 
-import { VisualShape } from "./types";
+import { Shape, VisualShape } from "./geometry";
 import { convert_to_shape, convert_to_strings, convert_to_points } from "./stringify";
-import { create_solver, PointInspector, Solver } from "./solver";
+import { create_solver, PointInspector, Setter, Solver } from "./solver";
 
 const vshapes: VisualShape[] = [
     {   // tetra I
@@ -113,7 +113,7 @@ function logBoard(pi:PointInspector) {
 const verbose = false;
 let counter = 0;
 
-const solver:Solver = create_solver(board_points, shapes, (set, pi) => {
+const solver:Solver = create_solver(board_points, shapes, (set:Setter, pi:PointInspector) => {
     set({x: 1, y: 0}, "M"); // Feb
     set({x: 3, y: 5}, "D"); // 25
     set({x: 3, y: 6}, "W"); // Sun
@@ -122,14 +122,14 @@ const solver:Solver = create_solver(board_points, shapes, (set, pi) => {
     logBoard(pi);
 });
 
-solver((pi) => {
+solver((pi:PointInspector) => {
     console.log("solution:");
     logBoard(pi);
     console.log("elapsed time: " + ((performance.now() - start) / 1000));
 
     // return false; // do not stop, keep finding more solutions
     return true; // stop at the first solution
-}, (pi, s) => {
+}, (pi:PointInspector, s:Shape) => {
     if (verbose) {
         console.log("failed to place: ");
         console.log(convert_to_strings(s.points, (p) => "O").join('\n'));
