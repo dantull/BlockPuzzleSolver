@@ -54,8 +54,6 @@ export type PointInspector = (p:Point) => string
 export type Setter = (p:Point, m:string) => void
 
 export function create_solver(board_points: Point[], shapes: Shape[], setup_callback:((s:Setter, pi:PointInspector) => void)):Solver {
-    let counter = 0;
-
     const board = new Board(board_points);
 
     setup_callback((p, m) => {
@@ -74,11 +72,7 @@ export function create_solver(board_points: Point[], shapes: Shape[], setup_call
                 for (let vi = 0; vi < vs.length; vi++) {
                     const v = vs[vi];
                     const remove = board.fill(v, si + "");
-                    counter++;
 
-                    if (counter % 1000000 === 0) {
-                        console.log(counter / 1000000);
-                    }
                     if (remove) {
                         placed = true;
                         places++;

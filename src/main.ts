@@ -111,6 +111,7 @@ function logBoard(pi:PointInspector) {
 }
 
 const verbose = false;
+let counter = 0;
 
 const solver:Solver = create_solver(board_points, shapes, (set, pi) => {
     set({x: 1, y: 0}, "M"); // Feb
@@ -136,6 +137,12 @@ solver((pi) => {
         logBoard(pi);
         console.log("--------")
     }
+    counter++;
+
+    if (counter % 1e4 === 0) {
+        console.log(counter / 1e4);
+    }
+
     return false; // always continue
 });
 
