@@ -53,53 +53,53 @@ export type Solver = (solution_callback:(pi:PointInspector) => boolean, deadend_
 export type PointInspector = (p:Point) => string
 export type Setter = (p:Point, m:string) => void
 
-export function create_solver(board_points: Point[], shapes: Shape[], setup_callback:((s:Setter, pi:PointInspector) => void)):Solver {
-    const board = new Board(board_points);
+function find_solutions(ss = 0, board:Board, shapes:Shape[],
+        solution_callback:(pi:PointInspector) => boolean,
+        deadend_callback:(pi:PointInspector, s:Shape) => boolean):boolean {
+    for (let si = ss; si < shapes.length; si++) {
+        const shape = shapes[si];
 
-    setup_callback((p, m) => {
-        board.fill([p], m);
-    }, (p) => board.at(p));
-    
-    function find_solutions(ss = 0, solution_callback:(pi:PointInspector) => boolean, deadend_callback:(pi:PointInspector, s:Shape) => boolean):boolean {
-        for (let si = ss; si < shapes.length; si++) {
-            const shape = shapes[si];
+        let placed = false;
+        let places = 0;
+        for (let bp of board.remaining()) {
+            const vs = variants(shape, bp);
 
-            let placed = false;
-            let places = 0;
-            for (let bp of board.remaining()) {
-                const vs = variants(shape, bp);
+            for (let vi = 0; vi < vs.length; vi++) {
+                const v = vs[vi];
+                const remove = board.fill(v, si + "");
 
-                for (let vi = 0; vi < vs.length; vi++) {
-                    const v = vs[vi];
-                    const remove = board.fill(v, si + "");
+                if (remove) {
+                    placed = true;
+                    places++;
 
-                    if (remove) {
-                        placed = true;
-                        places++;
-
-                        const halt = find_solutions(si + 1, solution_callback, deadend_callback);
-                        if (halt) {
-                            return halt; // unwind recursion
-                        } else {
-                            placed = false;
-                            remove(); // continue
-                        }
+                    const halt = find_solutions(si + 1, board, shapes, solution_callback, deadend_callback);
+                    if (halt) {
+                        return halt; // unwind recursion
+                    } else {
+                        placed = false;
+                        remove(); // continue
                     }
                 }
             }
-
-            if (!placed) {
-                if (places === 0) {
-                    return deadend_callback((p) => board.at(p), shape);
-                }
-                return false;
-            }
         }
 
-        return solution_callback((p) => board.at(p));
+        if (!placed) {
+            if (places === 0) {
+                return deadend_callback((p) => board.at(p), shape);
+            }
+            return false;
+        }
     }
 
+    return solution_callback((p) => board.at(p));
+}
+
+export function create_solver(board_points: Point[], shapes: Shape[], setup_callback:((s:Setter, pi:PointInspector) => void)):Solver {
+    const board = new Board(board_points);
+
+    setup_callback((p, m) => board.fill([p], m), (p) => board.at(p));
+    
     return (sln_cb, de_cb) => {
-        return find_solutions(0, sln_cb, de_cb)
+        return find_solutions(0, board, shapes, sln_cb, de_cb)
     };
 }
