@@ -1,4 +1,4 @@
-import { Point } from "./geometry";
+import { Point } from "./geometry.js";
 
 function encode(p:Point): string {
     return p.x + "_" + p.y;

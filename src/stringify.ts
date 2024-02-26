@@ -1,4 +1,4 @@
-import { Point, Shape, VisualShape } from "./geometry";
+import { Point, Shape, VisualShape } from "./geometry.js";
 
 export function convert_to_points(shape: string[]): Point[] {
     const points:Point[] = [];

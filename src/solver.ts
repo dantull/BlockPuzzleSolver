@@ -1,5 +1,5 @@
-import { Board } from "./board";
-import { Point, Shape } from "./geometry";
+import { Board } from "./board.js";
+import { Point, Shape } from "./geometry.js";
 
 function flip(ps: Point[]): Point[] {
     return ps.map(({x, y}) => ({y: y, x: -x}));

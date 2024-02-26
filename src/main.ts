@@ -1,9 +1,9 @@
 // 10 unique pieces, some of which differ when flipped (chirality)
 // and rotated (usually 4 shapes, but tetra I only has 2)
 
-import { Shape, VisualShape } from "./geometry";
-import { convert_to_shape, convert_to_strings, convert_to_points } from "./stringify";
-import { create_solver, PointInspector, Setter, Solver } from "./solver";
+import { Shape, VisualShape } from "./geometry.js";
+import { convert_to_shape, convert_to_strings, convert_to_points } from "./stringify.js";
+import { create_solver, PointInspector, Setter, Solver } from "./solver.js";
 
 const vshapes: VisualShape[] = [
     {   // tetra I
