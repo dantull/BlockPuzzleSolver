@@ -53,53 +53,92 @@ export type Solver = (solution_callback:(pi:PointInspector) => boolean, deadend_
 export type PointInspector = (p:Point) => string
 export type Setter = (p:Point, m:string) => void
 
-function find_solutions(ss = 0, board:Board, shapes:Shape[],
-        solution_callback:(pi:PointInspector) => boolean,
-        deadend_callback:(pi:PointInspector, s:Shape) => boolean):boolean {
-    for (let si = ss; si < shapes.length; si++) {
-        const shape = shapes[si];
+class ShapeState {
+    private pi: number = 0;
+    private variants: Point[][];
+    private vi = 0;
+    private remove: (() => void) | false = false;
+    private places: number = 0;
 
-        let placed = false;
-        let places = 0;
-        for (let bp of board.remaining()) {
-            const vs = variants(shape, bp);
-
-            for (let vi = 0; vi < vs.length; vi++) {
-                const v = vs[vi];
-                const remove = board.fill(v, si + "");
-
-                if (remove) {
-                    placed = true;
-                    places++;
-
-                    const halt = find_solutions(si + 1, board, shapes, solution_callback, deadend_callback);
-                    if (halt) {
-                        return halt; // unwind recursion
-                    } else {
-                        placed = false;
-                        remove(); // continue
-                    }
-                }
-            }
-        }
-
-        if (!placed) {
-            if (places === 0) {
-                return deadend_callback((p) => board.at(p), shape);
-            }
-            return false;
-        }
+    constructor(private shape: Shape, private points:Point[]) {
+        this.variants = this.newVariants();
     }
 
-    return solution_callback((p) => board.at(p));
+    private newVariants() {
+        return this.pi < this.points.length ? variants(this.shape, this.points[this.pi]) : []
+    }
+
+    step(board:Board, si:number) {
+        if (this.remove) {
+            this.remove();
+            this.remove = false;
+        }
+        
+        if (this.vi < this.variants.length) {
+            const v = this.variants[this.vi];
+
+            this.remove = board.fill(v, si + "");
+
+            if (this.remove) {
+                this.places++;
+            }
+
+            this.vi++;
+        } else if (this.vi === this.variants.length) {
+            this.pi++;
+            this.variants = this.newVariants()
+            this.vi = 0;
+        }
+
+        return this.pi < this.points.length; // end of iteration when pi passes end of points
+    }
+
+    placed() {
+        return this.remove !== false
+    }
+
+    noplace() {
+        return this.places === 0;
+    }
 }
 
 export function create_solver(board_points: Point[], shapes: Shape[], setup_callback:((s:Setter, pi:PointInspector) => void)):Solver {
     const board = new Board(board_points);
 
     setup_callback((p, m) => board.fill([p], m), (p) => board.at(p));
-    
+
+    let stack: ShapeState[] = [];
+
+    const nextShape = () => new ShapeState(shapes[stack.length], board.remaining());
+
+    stack.push(nextShape());
+
     return (sln_cb, de_cb) => {
-        return find_solutions(0, board, shapes, sln_cb, de_cb)
+        let more = true;
+        let ss = stack.pop()!;
+
+        while (more) {
+            more = ss.step(board, stack.length);
+
+            if (ss.placed()) {
+                stack.push(ss);
+                if (stack.length === shapes.length) {
+                    if (sln_cb((p) => board.at(p))) {
+                        return true;
+                    }
+                } else {
+                    ss = nextShape(); // piece placed, prepare the next one
+                }
+            } else if (!more) {
+                if (ss.noplace() && de_cb((p) => board.at(p), shapes[stack.length])) {
+                    return true;
+                }
+
+                ss = stack.pop()!; // resume previous shape
+                more = true
+            }
+        }
+
+        return true;
     };
 }
