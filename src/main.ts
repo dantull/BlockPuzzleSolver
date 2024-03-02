@@ -245,6 +245,16 @@ function process() {
     }
 }
 
-handle = setInterval(process, 0)
+function solve() {
+    handle = setInterval(process, 0)
+}
 
+if (!browser) {
+    solve();
+} else {
+    const button:HTMLButtonElement = <HTMLButtonElement> document.getElementById("start");
+    if (button) {
+        button.onclick = solve;
+    }
+}
 //# sourceMappingURL=main.js.map
