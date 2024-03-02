@@ -215,7 +215,7 @@ const callback = (pi:PointInspector, e:Event) => {
 let handle:number | undefined;
 
 function process() {
-    for(let i = 0; i < 10000 && !done; i++) {
+    for(let i = 0; i < 50000 && !done; i++) {
         solver(callback);
     }
 
