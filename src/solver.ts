@@ -4,43 +4,34 @@ import { Point, Shape } from "./geometry.js";
 // negative 0 is weird, avoid it
 const neg = (x:number) => x === 0 ? x : -x;
 
-function flip(ps: Point[]): Point[] {
-    return ps.map(({x, y}) => ({y: y, x: neg(x)}));
-}
-
 type PointMapper = (p:Point) => Point
 
+const flip:PointMapper = ({x, y}) => ({y: y, x: neg(x)});
+
 const rotate_fns: PointMapper[] = [
+    ({x, y}) => ({x: x, y: y}), // 0 degrees
     ({x, y}) => ({x: neg(y), y: x}), // 90 degrees
     ({x, y}) => ({x: neg(x), y: neg(y)}), // 180 degrees
     ({x, y}) => ({x: y, y: neg(x)}) // 270 degrees
 ];
 
-// FIXME: when the operations are done in this order, the
-// results do not all start from the same origin square,
-// which could cause the search to fail to find an opening
-// for the piece just because the flipped orientation does
-// not line up right
-//
-// a first attempt to fix this made it take longer to find
-// solutions, so I need to think on this more.
+const noop:PointMapper = (p:Point):Point => p;
+
 function variants(s: Shape, at: Point): Point[][] {
     const vs:Point[][] = [];
-    const ts:Point[] = s.points.map(({x, y}) => ({x: x + at.x, y: y + at.y}));
-    vs.push(ts);
+    const flips = s.chiral ? [noop, flip] : [noop];
 
-    for (let i = 0; i < s.rotations; i++) {
-        const rf = rotate_fns[i];
-        vs.push(s.points.map(p => {
-            const pr = rf(p);
-            pr.x += at.x;
-            pr.y += at.y;
-            return pr;
-        }));
-    }
-
-    if (s.chiral) { 
-        vs.push(...vs.map(flip));
+    for (let f = 0; f < flips.length; f++) {
+        const ff = flips[f];
+        for (let i = 0; i <= s.rotations; i++) {
+            const rf = rotate_fns[i];
+            vs.push(s.points.map(p => {
+                const pr = ff(rf(p));
+                pr.x += at.x;
+                pr.y += at.y;
+                return pr;
+            }));
+        }
     }
 
     return vs;
