@@ -17,7 +17,7 @@ const rotate_fns: PointMapper[] = [
 
 const noop:PointMapper = (p:Point):Point => p;
 
-function variants(s: Shape, at: Point): Point[][] {
+function variants(s: Shape): Point[][] {
     const vs:Point[][] = [];
     const flips = s.chiral ? [noop, flip] : [noop];
 
@@ -26,15 +26,20 @@ function variants(s: Shape, at: Point): Point[][] {
         for (let i = 0; i <= s.rotations; i++) {
             const rf = rotate_fns[i];
             vs.push(s.points.map(p => {
-                const pr = ff(rf(p));
-                pr.x += at.x;
-                pr.y += at.y;
-                return pr;
+                return ff(rf(p));
             }));
         }
     }
 
     return vs;
+}
+
+function offsetOne(p:Point, at:Point) {
+    return {x:p.x + at.x, y:p.y + at.y};
+}
+
+function offsetAll(ps:Point[], at:Point): Point[] {
+    return ps.map((p) => offsetOne(p, at));
 }
 
 // Solving Algorithm Plan:
@@ -60,12 +65,12 @@ class ShapeState {
     private remove: (() => void) | false = false;
     private places: number = 0;
 
-    constructor(public shape: Shape, private points:Point[]) {
+    constructor(public shape: Shape, private baseVariants:Point[][], private points:Point[]) {
         this.variants = this.newVariants();
     }
 
     private newVariants() {
-        return this.pi < this.points.length ? variants(this.shape, this.points[this.pi]) : []
+        return this.pi < this.points.length ? this.baseVariants.map((v) => offsetAll(v, this.points[this.pi])) : []
     }
 
     step(board:Board, si:number) {
@@ -109,8 +114,9 @@ export function create_solver(board_points: Point[], shapes: Shape[], setup_call
     setup_callback((p, m) => board.fill([p], m), (p) => board.at(p));
 
     let stack: ShapeState[] = [];
+    let allBaseVariants: Point[][][] = shapes.map(variants);
 
-    const nextShape = () => new ShapeState(shapes[stack.length], board.remaining());
+    const nextShape = () => new ShapeState(shapes[stack.length], allBaseVariants[stack.length], board.remaining());
 
     stack.push(nextShape());
 
