@@ -124,17 +124,16 @@ export function create_solver(board_points: Point[], shapes: Shape[], setup_call
     stack.push(nextShape());
 
     return (cb) => {
-        let ss = stack.pop()!;
+        let ss = stack[stack.length - 1];
 
-        const more = ss.step(board, stack.length);
+        const more = ss.step(board, stack.length - 1);
 
         if (!more) {
             if (ss.noplace()) {
                 cb(pi, { kind: "failed", shape: ss.shape })
             }
+            stack.pop();
         } else {
-            stack.push(ss);
-
             if (ss.placed()) {
                 const solved = stack.length === shapes.length
                 cb(pi, { kind: solved ? "solved" : "placed", shape: ss.shape })
