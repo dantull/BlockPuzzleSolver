@@ -201,8 +201,18 @@ const callback = (pi:PointInspector, e:Event) => {
     }
 }
 
-while (!done) {
-    solver(callback);
+let handle:number | undefined;
+
+function process() {
+    for(let i = 0; i < 10000 && !done; i++) {
+        solver(callback);
+    }
+
+    if (done && handle !== undefined) {
+        clearInterval(handle);
+    }
 }
+
+handle = setInterval(process, 0)
 
 //# sourceMappingURL=main.js.map
