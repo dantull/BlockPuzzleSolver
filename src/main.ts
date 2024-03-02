@@ -172,16 +172,16 @@ const verbose = false;
 let counter = 0;
 
 const solver:Solver = create_solver(board_points, shapes, (set:Setter, pi:PointInspector) => {
-    set(months.Mar, "M");
-    set(days[5], "D");
-    set(weekdays.Tue, "W");
+    set(months.Dec, "M");
+    set(days[25], "D");
+    set(weekdays.Mon, "W");
 
     console.log("Solving for:");
     logBoard(pi);
 });
 
 const browser = (typeof window === "object");
-const stepping = browser ? 1 : 1e5;
+const stepping = browser ? 1e2 : 1e5;
 
 let done = false;
 const callback = (pi:PointInspector, e:Event) => {

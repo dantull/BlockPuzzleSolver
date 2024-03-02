@@ -1,12 +1,14 @@
 import { Point } from "./geometry.js";
 
-function encode(p:Point): string {
-    return p.x + "_" + p.y;
+type pe = number;
+
+function encode(p:Point): pe {
+    return p.x * 16 + p.y;
 }
 
 export class Board {
-    private filled:Map<string, string>;
-    private unfilled:Set<string>;
+    private filled:Map<pe, string>;
+    private unfilled:Set<pe>;
     private all:Point[];
 
     constructor(ps:Point[]) {
