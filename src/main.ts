@@ -180,6 +180,21 @@ const solver:Solver = create_solver(board_points, shapes, (set:Setter, pi:PointI
     logBoard(pi);
 });
 
+const styles:Map<string, string> = new Map();
+styles.set("0", "#9e0142");
+styles.set("9", "#d53e4f");
+styles.set("1", "#f46d43");
+styles.set("8", "#fdae61");
+styles.set("2", "#fee08b");
+styles.set("7", "#e6f598");
+styles.set("3", "#abdda4");
+styles.set("6", "#66c2a5");
+styles.set("4", "#3288bd");
+styles.set("5", "#5e4fa2");
+styles.set(".", "#cccccc");
+
+const SCALE = 25;
+
 const browser = (typeof window === "object");
 const stepping = browser ? 1e2 : 1e5;
 
@@ -202,9 +217,15 @@ const callback = (pi:PointInspector, e:Event) => {
 
     if (counter % stepping === 0 || e.kind === "solved") {
         if (browser) {
-            const pre = document.getElementById("output")
-            if (pre) {
-                pre.innerText = convert_to_strings(board_points, (p) => pi(p) || " ").join('\n')
+            const canvas = <HTMLCanvasElement> document.getElementById("output")
+            if (canvas) {
+                const ctx = canvas.getContext("2d")!;
+                // pre.innerText = convert_to_strings(board_points, (p) => pi(p) || " ").join('\n')
+                for (let bp of board_points) {
+                    const color = styles.get(pi(bp));
+                    ctx.fillStyle = color || "#000000";
+                    ctx.fillRect(bp.x * SCALE, bp.y * SCALE, SCALE, SCALE);
+                }
             }
         } else {
             console.log(counter / stepping);
