@@ -173,12 +173,15 @@ let counter = 0;
 
 const solver:Solver = create_solver(board_points, shapes, (set:Setter, pi:PointInspector) => {
     set(months.Mar, "M");
-    set(days[3], "D");
-    set(weekdays.Sun, "W");
+    set(days[5], "D");
+    set(weekdays.Tue, "W");
 
     console.log("Solving for:");
     logBoard(pi);
 });
+
+const browser = (typeof window === "object");
+const stepping = browser ? 1 : 1e5;
 
 let done = false;
 const callback = (pi:PointInspector, e:Event) => {
@@ -194,10 +197,18 @@ const callback = (pi:PointInspector, e:Event) => {
         logBoard(pi);
         console.log("--------")
     }
+
     counter++;
 
-    if (counter % 1e4 === 0) {
-        console.log(counter / 1e4);
+    if (counter % stepping === 0 || e.kind === "solved") {
+        if (browser) {
+            const pre = document.getElementById("output")
+            if (pre) {
+                pre.innerText = convert_to_strings(board_points, (p) => pi(p) || " ").join('\n')
+            }
+        } else {
+            console.log(counter / stepping);
+        }
     }
 }
 

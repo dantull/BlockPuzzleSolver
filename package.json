@@ -5,14 +5,17 @@
   "main": "main.js",
   "type": "module",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && cp res/index.html dist",
+    "watch": "tsc --watch",
     "main": "node dist/main.js",
+    "serve": "http-server ./dist",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "http-server": "^14.1.1",
     "prettier": "^3.2.1",
     "typescript": "^5.3.3"
   }
