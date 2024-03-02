@@ -22,11 +22,14 @@ export class Board {
     }
 
     fill(ps:Point[], marker:string) {
-        const eps = ps.map(encode);
+        const eps:pe[] = [];
 
-        for (let ep of eps) {
+        for (let p of ps) {
+            const ep = encode(p);
             if (!this.unfilled.has(ep)) {
                 return false;
+            } else {
+                eps.push(ep);
             }
         }
         for (let ep of eps) {
