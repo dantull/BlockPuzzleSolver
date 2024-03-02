@@ -57,7 +57,8 @@ function variants(s: Shape, at: Point): Point[][] {
 // 6. If all pieces are used, stop and report the solution that was found.
 // 7. Exhaustive mode could continue to find solutions.
 
-export type Solver = (solution_callback:(pi:PointInspector) => boolean, deadend_callback:(pi:PointInspector, s:Shape) => boolean) => boolean
+export type Event = { kind: "placed" | "failed" | "solved", shape: Shape }
+export type Solver = (callback:(pi:PointInspector, m:Event) => void) => void
 export type PointInspector = (p:Point) => string
 export type Setter = (p:Point, m:string) => void
 
@@ -68,7 +69,7 @@ class ShapeState {
     private remove: (() => void) | false = false;
     private places: number = 0;
 
-    constructor(private shape: Shape, private points:Point[]) {
+    constructor(public shape: Shape, private points:Point[]) {
         this.variants = this.newVariants();
     }
 
@@ -112,6 +113,7 @@ class ShapeState {
 
 export function create_solver(board_points: Point[], shapes: Shape[], setup_callback:((s:Setter, pi:PointInspector) => void)):Solver {
     const board = new Board(board_points);
+    const pi = (p:Point) => board.at(p)
 
     setup_callback((p, m) => board.fill([p], m), (p) => board.at(p));
 
@@ -121,32 +123,25 @@ export function create_solver(board_points: Point[], shapes: Shape[], setup_call
 
     stack.push(nextShape());
 
-    return (sln_cb, de_cb) => {
-        let more = true;
+    return (cb) => {
         let ss = stack.pop()!;
 
-        while (more) {
-            more = ss.step(board, stack.length);
+        const more = ss.step(board, stack.length);
+
+        if (!more) {
+            if (ss.noplace()) {
+                cb(pi, { kind: "failed", shape: ss.shape })
+            }
+        } else {
+            stack.push(ss);
 
             if (ss.placed()) {
-                stack.push(ss);
-                if (stack.length === shapes.length) {
-                    if (sln_cb((p) => board.at(p))) {
-                        return true;
-                    }
-                } else {
-                    ss = nextShape(); // piece placed, prepare the next one
+                const solved = stack.length === shapes.length
+                cb(pi, { kind: solved ? "solved" : "placed", shape: ss.shape })
+                if (!solved) {
+                    stack.push(nextShape());
                 }
-            } else if (!more) {
-                if (ss.noplace() && de_cb((p) => board.at(p), shapes[stack.length])) {
-                    return true;
-                }
-
-                ss = stack.pop()!; // resume previous shape
-                more = true
             }
         }
-
-        return true;
     };
 }

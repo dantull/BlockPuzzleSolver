@@ -3,7 +3,7 @@
 
 import { Point, Shape, VisualShape } from "./geometry.js";
 import { convert_to_shape, convert_to_strings, convert_to_points } from "./stringify.js";
-import { create_solver, PointInspector, Setter, Solver } from "./solver.js";
+import { create_solver, Event, PointInspector, Setter, Solver } from "./solver.js";
 
 const vshapes: VisualShape[] = [
     {   // tetra I
@@ -180,17 +180,16 @@ const solver:Solver = create_solver(board_points, shapes, (set:Setter, pi:PointI
     logBoard(pi);
 });
 
-solver((pi:PointInspector) => {
-    console.log("solution:");
-    logBoard(pi);
-    console.log("elapsed time: " + ((performance.now() - start) / 1000));
-
-    // return false; // do not stop, keep finding more solutions
-    return true; // stop at the first solution
-}, (pi:PointInspector, s:Shape) => {
-    if (verbose) {
+let done = false;
+const callback = (pi:PointInspector, e:Event) => {
+    if (e.kind === "solved") {
+        console.log("solution:");
+        logBoard(pi);
+        console.log("elapsed time: " + ((performance.now() - start) / 1000));
+        done = true // solution found
+    } else if (verbose && e.kind === "failed") {
         console.log("failed to place: ");
-        console.log(convert_to_strings(s.points, (p) => "O").join('\n'));
+        console.log(convert_to_strings(e.shape.points, (p) => "O").join('\n'));
         console.log("into");
         logBoard(pi);
         console.log("--------")
@@ -200,8 +199,10 @@ solver((pi:PointInspector) => {
     if (counter % 1e4 === 0) {
         console.log(counter / 1e4);
     }
+}
 
-    return false; // always continue
-});
+while (!done) {
+    solver(callback);
+}
 
 //# sourceMappingURL=main.js.map
