@@ -196,7 +196,7 @@ styles.set(".", "#cccccc");
 const SCALE = 25;
 
 const browser = (typeof window === "object");
-const stepping = browser ? 1e2 : 1e5;
+const stepping = browser ? 1 : 1e5;
 
 let done = false;
 const callback = (pi:PointInspector, e:Event) => {
@@ -235,13 +235,18 @@ const callback = (pi:PointInspector, e:Event) => {
 
 let handle:number | undefined;
 
+function stop() {
+    clearInterval(handle);
+    handle = undefined;
+}
+
 function process() {
     for(let i = 0; i < 50000 && !done; i++) {
         solver(callback);
     }
 
     if (done && handle !== undefined) {
-        clearInterval(handle);
+        stop();
     }
 }
 
@@ -254,7 +259,15 @@ if (!browser) {
 } else {
     const button:HTMLButtonElement = <HTMLButtonElement> document.getElementById("start");
     if (button) {
-        button.onclick = solve;
+        button.onclick = function() {
+            if (handle === undefined) {
+                solve();
+                button.innerText = "Pause";
+            } else {
+                stop();
+                button.innerText = "Start";
+            }
+        }
     }
 }
 //# sourceMappingURL=main.js.map
