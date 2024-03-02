@@ -1,18 +1,18 @@
 import { Board } from "./board.js";
 import { Point, Shape } from "./geometry.js";
 
-function flip(ps: Point[]): Point[] {
-    return ps.map(({x, y}) => ({y: y, x: -x}));
-}
-
 // negative 0 is weird, avoid it
 const neg = (x:number) => x === 0 ? x : -x;
+
+function flip(ps: Point[]): Point[] {
+    return ps.map(({x, y}) => ({y: y, x: neg(x)}));
+}
 
 type PointMapper = (p:Point) => Point
 
 const rotate_fns: PointMapper[] = [
     ({x, y}) => ({x: neg(y), y: x}), // 90 degrees
-    ({x, y}) => ({x: neg(x), y: -y}), // 180 degrees
+    ({x, y}) => ({x: neg(x), y: neg(y)}), // 180 degrees
     ({x, y}) => ({x: y, y: neg(x)}) // 270 degrees
 ];
 
