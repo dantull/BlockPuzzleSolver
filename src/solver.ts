@@ -60,17 +60,11 @@ export type Setter = (p:Point, m:string) => void
 
 class ShapeState {
     private pi: number = 0;
-    private variants: Point[][];
     private vi = 0;
     private remove: (() => void) | false = false;
     private places: number = 0;
 
     constructor(public shape: Shape, private baseVariants:Point[][], private points:Point[]) {
-        this.variants = this.newVariants();
-    }
-
-    private newVariants() {
-        return this.pi < this.points.length ? this.baseVariants.map((v) => offsetAll(v, this.points[this.pi])) : []
     }
 
     step(board:Board, si:number) {
@@ -79,8 +73,8 @@ class ShapeState {
             this.remove = false;
         }
         
-        if (this.vi < this.variants.length) {
-            const v = this.variants[this.vi];
+        if (this.vi < this.baseVariants.length) {
+            const v = offsetAll(this.baseVariants[this.vi], this.points[this.pi]);
 
             this.remove = board.fill(v, si + "");
 
@@ -89,9 +83,8 @@ class ShapeState {
             }
 
             this.vi++;
-        } else if (this.vi === this.variants.length) {
+        } else if (this.vi === this.baseVariants.length) {
             this.pi++;
-            this.variants = this.newVariants()
             this.vi = 0;
         }
 
