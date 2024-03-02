@@ -16,6 +16,14 @@ const rotate_fns: PointMapper[] = [
     ({x, y}) => ({x: y, y: neg(x)}) // 270 degrees
 ];
 
+// FIXME: when the operations are done in this order, the
+// results do not all start from the same origin square,
+// which could cause the search to fail to find an opening
+// for the piece just because the flipped orientation does
+// not line up right
+//
+// a first attempt to fix this made it take longer to find
+// solutions, so I need to think on this more.
 function variants(s: Shape, at: Point): Point[][] {
     const vs:Point[][] = [];
     const ts:Point[] = s.points.map(({x, y}) => ({x: x + at.x, y: y + at.y}));
