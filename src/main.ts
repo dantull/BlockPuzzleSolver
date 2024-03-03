@@ -3,7 +3,8 @@
 
 import { Point, Shape, VisualShape } from "./geometry.js";
 import { convert_to_shape, convert_to_strings, convert_to_points } from "./stringify.js";
-import { create_solver, Event, PointInspector, Setter, Solver } from "./solver.js";
+import { create_solver, Event, PointInspector, Setter, Solver }from "./solver.js";
+import { makeBrowserRenderer } from "./browserui.js";
 
 const vshapes: VisualShape[] = [
     {   // tetra I
@@ -171,32 +172,63 @@ function logBoard(pi:PointInspector) {
 const verbose = false;
 let counter = 0;
 
-const solver:Solver = create_solver(board_points, shapes, (set:Setter, pi:PointInspector) => {
-    set(months.Dec, "M");
-    set(days[25], "D");
-    set(weekdays.Mon, "W");
+const points:Point[] = [];
 
-    console.log("Solving for:");
-    logBoard(pi);
-});
+function prepareSolver() {
+    return create_solver(board_points, shapes, (set:Setter, pi:PointInspector) => {
+        if (points.length === 0) {
+            set(months.Dec, "M");
+            set(days[25], "D");
+            set(weekdays.Mon, "W");
+        } else {
+            for (let i = 0; i < points.length; i++) {
+                set(points[i], "X");
+            }
+        }
 
-const styles:Map<string, string> = new Map();
-styles.set("0", "#9e0142");
-styles.set("9", "#d53e4f");
-styles.set("1", "#f46d43");
-styles.set("8", "#fdae61");
-styles.set("2", "#fee08b");
-styles.set("7", "#e6f598");
-styles.set("3", "#abdda4");
-styles.set("6", "#66c2a5");
-styles.set("4", "#3288bd");
-styles.set("5", "#5e4fa2");
-styles.set(".", "#cccccc");
-
-const SCALE = 25;
+        console.log("Solving for:");
+        logBoard(pi);
+    });
+}
 
 const browser = (typeof window === "object");
-const stepping = browser ? 1 : 1e5;
+
+let updateOnClick:(ps:PointInspector) => void = () => {};
+
+function makeRenderer() {
+    if (browser) {
+        return makeBrowserRenderer(board_points, (p:Point) => {
+            points.push(p);
+            
+            while (points.length > 3) {
+                points.shift();
+            }
+
+            updateOnClick((p) => {
+                if (points.find((v) => v.x === p.x && v.y === p.y)) {
+                    return " ";
+                } else {
+                    return ".";
+                }
+            });
+        });
+    }
+
+    let counter = 0;
+    const stepping = 1e5;
+
+    return (pi:PointInspector) => {
+        counter++;
+
+        if (counter % stepping === 0) {
+            console.log(counter / stepping);
+        }
+    }
+}
+
+const render = makeRenderer();
+
+updateOnClick = render;
 
 let done = false;
 const callback = (pi:PointInspector, e:Event) => {
@@ -213,24 +245,7 @@ const callback = (pi:PointInspector, e:Event) => {
         console.log("--------")
     }
 
-    counter++;
-
-    if (counter % stepping === 0 || e.kind === "solved") {
-        if (browser) {
-            const canvas = <HTMLCanvasElement> document.getElementById("output")
-            if (canvas) {
-                const ctx = canvas.getContext("2d")!;
-                // pre.innerText = convert_to_strings(board_points, (p) => pi(p) || " ").join('\n')
-                for (let bp of board_points) {
-                    const color = styles.get(pi(bp));
-                    ctx.fillStyle = color || "#000000";
-                    ctx.fillRect(bp.x * SCALE, bp.y * SCALE, SCALE, SCALE);
-                }
-            }
-        } else {
-            console.log(counter / stepping);
-        }
-    }
+    render(pi);
 }
 
 let handle:number | undefined;
@@ -240,7 +255,13 @@ function stop() {
     handle = undefined;
 }
 
+let solver:Solver | undefined;
+
 function process() {
+    if (!solver) {
+        solver = prepareSolver();
+    }
+
     for(let i = 0; i < 50000 && !done; i++) {
         solver(callback);
     }
