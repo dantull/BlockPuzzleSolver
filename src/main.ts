@@ -251,7 +251,7 @@ const callback = (pi:PointInspector, e:Event) => {
     render(pi);
 }
 
-let handle:number | undefined;
+let handle:number | undefined | NodeJS.Timeout;
 
 function stop() {
     clearInterval(handle);

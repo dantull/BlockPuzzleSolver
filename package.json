@@ -6,10 +6,11 @@
   "type": "module",
   "scripts": {
     "build": "tsc && cp res/index.html dist",
+    "clean": "rm -fR dist/",
     "watch": "tsc --watch",
     "main": "node dist/main.js",
     "serve": "http-server ./dist",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "keywords": [],
   "author": "",
@@ -17,6 +18,8 @@
   "devDependencies": {
     "http-server": "^14.1.1",
     "prettier": "^3.2.1",
+    "ts-jest": "^29.1.2",
+    "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   }
 }
