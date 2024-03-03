@@ -198,6 +198,7 @@ let updateOnClick:(ps:PointInspector) => void = () => {};
 function makeRenderer() {
     if (browser) {
         return makeBrowserRenderer(board_points, (p:Point) => {
+            solver = undefined;
             points.push(p);
             
             while (points.length > 3) {
@@ -229,6 +230,8 @@ function makeRenderer() {
 const render = makeRenderer();
 
 updateOnClick = render;
+
+updateOnClick((p) => ".");
 
 let done = false;
 const callback = (pi:PointInspector, e:Event) => {
@@ -282,6 +285,7 @@ if (!browser) {
     if (button) {
         button.onclick = function() {
             if (handle === undefined) {
+                done = false;
                 solve();
                 button.innerText = "Pause";
             } else {
