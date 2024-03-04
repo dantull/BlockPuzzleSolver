@@ -4,7 +4,7 @@ import { create_solver, Event } from './solver.js';
 
 describe("solver", () => {
     test("solver finds trivial solution", () => {
-        const board = [];
+        const board:Point[] = [];
         for (let x = 0; x < 3; x++) {
             for (let y = 0; y < 3; y++) {
                 board.push({x, y});
@@ -20,6 +20,12 @@ describe("solver", () => {
         let setup_calls = 0;
         const solver = create_solver(board, [shape], (s, pi) => {
             setup_calls++;
+
+            for (let bp of board) {
+                expect(pi(bp)).toEqual(".");
+            }
+
+            expect(pi({x: -1, y: -1})).toEqual(" ")
         });
 
         expect(setup_calls).toBe(1);
@@ -29,6 +35,10 @@ describe("solver", () => {
         solver((pi, e) => {
             event_calls++;
             event = e;
+
+            for (let bp of board) {
+                expect(pi(bp)).toEqual("0");
+            }
         })
 
         expect(event_calls === 1);
