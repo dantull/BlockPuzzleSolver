@@ -47,26 +47,68 @@ describe("solver", () => {
         expect((event as any).kind).toEqual("solved");
     })
 
-    test("solver finds rotation", () => {
-        const board = [{x: 0, y: 0}, {x: 1, y: 0}];
-        const shape:Shape = {
-            points: [{x: 0, y: 0}, {x: 0, y: 1}],
+    type SolverCase = {
+        name: string,
+        chiral: boolean,
+        rotations: 0 | 1 | 3,
+        events: string[]
+    }
+
+    const cases:SolverCase[] = [
+        {
+            name: "impossible",
+            rotations: 0,
             chiral: false,
-            rotations: 1
-        };
+            events: ["failed"]
+        },
+        {
+            name: "rotation",
+            rotations: 1,
+            chiral: false,
+            events: ["solved"]
+        },
+        {
+            name: "extra rotations",
+            rotations: 3,
+            chiral: false,
+            events: ["solved", "solved"]
+        },
+        {
+            name: "flip",
+            rotations: 1,
+            chiral: true,
+            events: ["solved", "solved"]
+        },
+        {
+            name: "all rotations and flip",
+            rotations: 3,
+            chiral: true,
+            events: ["solved", "solved", "solved", "solved"]
+        }
+    ];
 
-        const solver = create_solver(board, [shape], (s, pi) => {});
-        let event = undefined;
-        let calls = 0;
+    for (const c of cases) {
+        test(`solver case ${c.name}`, () => {
+            const board = [{x: 0, y: 0}, {x: 1, y: 0}];
+            const shape:Shape = {
+                points: [{x: 0, y: 0}, {x: 0, y: 1}],
+                chiral: c.chiral,
+                rotations: c.rotations
+            };
 
-        while(solver((pi, e) => {
-            event = e;
-            calls++;
-        })) { };
+            const solver = create_solver(board, [shape], (s, pi) => {});
+            let events:Event[] = [];
 
-        expect(calls).toEqual(1);
-        expect(event).toBeDefined();
-        expect(event).toHaveProperty("kind");
-        expect((event as any).kind).toEqual("solved");
-    });
+            while(solver((pi, e) => {
+                events.push(e)
+            })) { };
+        
+            expect(solver((pi, e) => { })).toEqual(false)
+
+            expect(events.length).toEqual(c.events.length)
+            for (let i = 0; i < events.length; i++) {
+                expect(events[i].kind).toEqual(c.events[i])
+            }
+        });
+    }
 });
