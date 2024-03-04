@@ -52,12 +52,6 @@ export class Board {
 
         return this.filled.get(encode(p)) || ' ';
     }
-    check(p:Point) {
-        return this.unfilled.has(encode(p));
-    }
-    left() {
-        return this.unfilled.size;
-    }
     remaining() {
         return this.all.filter((p) => this.unfilled.has(encode(p)));
     }

@@ -104,7 +104,7 @@ export function create_solver(board_points: Point[], shapes: Shape[], setup_call
     const board = new Board(board_points);
     const pi = (p:Point) => board.at(p)
 
-    setup_callback((p, m) => board.fill([p], m), (p) => board.at(p));
+    setup_callback((p, m) => board.fill([p], m), pi);
 
     let stack: ShapeState[] = [];
     let allBaseVariants: Point[][][] = shapes.map(variants);
