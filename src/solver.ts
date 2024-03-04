@@ -54,7 +54,7 @@ function offsetAll(ps:Point[], at:Point): Point[] {
 // 7. Exhaustive mode could continue to find solutions.
 
 export type Event = { kind: "placed" | "failed" | "solved", shape: Shape }
-export type Solver = (callback:(pi:PointInspector, m:Event) => void) => void
+export type Solver = (callback:(pi:PointInspector, m:Event) => void) => boolean
 export type PointInspector = (p:Point) => string
 export type Setter = (p:Point, m:string) => void
 
@@ -116,6 +116,10 @@ export function create_solver(board_points: Point[], shapes: Shape[], setup_call
     return (cb) => {
         let ss = stack[stack.length - 1];
 
+        if (!ss) {
+            return false;
+        }
+
         const more = ss.step(board, stack.length - 1);
 
         if (!more) {
@@ -123,6 +127,8 @@ export function create_solver(board_points: Point[], shapes: Shape[], setup_call
                 cb(pi, { kind: "failed", shape: ss.shape })
             }
             stack.pop();
+
+            return stack.length > 0;
         } else {
             if (ss.placed()) {
                 const solved = stack.length === shapes.length
@@ -131,6 +137,8 @@ export function create_solver(board_points: Point[], shapes: Shape[], setup_call
                     stack.push(nextShape());
                 }
             }
+
+            return true;
         }
     };
 }

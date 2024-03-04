@@ -36,4 +36,27 @@ describe("solver", () => {
         expect(event).toHaveProperty("kind");
         expect((event as any).kind).toEqual("solved");
     })
+
+    test("solver finds rotation", () => {
+        const board = [{x: 0, y: 0}, {x: 1, y: 0}];
+        const shape:Shape = {
+            points: [{x: 0, y: 0}, {x: 0, y: 1}],
+            chiral: false,
+            rotations: 1
+        };
+
+        const solver = create_solver(board, [shape], (s, pi) => {});
+        let event = undefined;
+        let calls = 0;
+
+        while(solver((pi, e) => {
+            event = e;
+            calls++;
+        })) { };
+
+        expect(calls).toEqual(1);
+        expect(event).toBeDefined();
+        expect(event).toHaveProperty("kind");
+        expect((event as any).kind).toEqual("solved");
+    });
 });
