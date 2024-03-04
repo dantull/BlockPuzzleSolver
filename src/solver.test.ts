@@ -142,4 +142,18 @@ describe("solver", () => {
         expect(events.get("failed")).toEqual(4)
         expect(events.get("placed")).toEqual(8)
     });
+
+    test("solver with setup square filling", () => {
+        const board = point_rectangle(2, 2);
+        let called = false;
+        create_solver(board, [], (s, pi) => {
+            const p = {x: 0, y: 1};
+            expect(pi(p)).toEqual('.');
+            s(p, "X");
+            expect(pi(p)).toEqual('X');
+            called = true;
+        });
+
+        expect(called).toEqual(true);
+    })
 });
