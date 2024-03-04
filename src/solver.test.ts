@@ -2,14 +2,20 @@ import {describe, expect, jest, test} from '@jest/globals';
 import { Point, Shape } from './geometry.js';
 import { create_solver, Event } from './solver.js';
 
+function point_rectangle(xlen: number, ylen: number):Point[] {
+    let points = [];
+    for (let x = 0; x < xlen; x++) {
+        for (let y = 0; y < ylen; y++) {
+            points.push({x, y});
+        }
+    }
+
+    return points;
+}
+
 describe("solver", () => {
     test("solver finds trivial solution", () => {
-        const board:Point[] = [];
-        for (let x = 0; x < 3; x++) {
-            for (let y = 0; y < 3; y++) {
-                board.push({x, y});
-            }
-        }
+        const board:Point[] = point_rectangle(3, 3);
 
         const shape:Shape = {
             points: board,
@@ -111,4 +117,29 @@ describe("solver", () => {
             }
         });
     }
+
+    test("real solver case", () => {
+        const board = point_rectangle(2, 3);
+        const shape:Shape = {
+            points: [{x: 0, y: 0}, {x: 0, y: 1}, {x: 1, y: 0}],
+            chiral: false,
+            rotations: 3
+        };
+
+        const solver = create_solver(board, [shape, shape], (s, pi) => {});
+        let events:Map<string, number> = new Map();
+        events.set("solved", 0);
+        events.set("failed", 0);
+        events.set("placed", 0);
+
+        while(solver((pi, e) =>
+        {
+            expect(events.has(e.kind));
+            events.set(e.kind, events.get(e.kind)! + 1)
+        })) { };
+
+        expect(events.get("solved")).toEqual(4)
+        expect(events.get("failed")).toEqual(4)
+        expect(events.get("placed")).toEqual(8)
+    });
 });
