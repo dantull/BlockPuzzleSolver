@@ -266,7 +266,7 @@ function process() {
     }
 
     for(let i = 0; i < 50000 && !done; i++) {
-        solver(callback);
+        done = !solver(callback);
     }
 
     if (done && handle !== undefined) {
