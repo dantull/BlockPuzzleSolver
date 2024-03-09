@@ -5,7 +5,7 @@ import { Point, Shape, VisualShape } from "./geometry.js";
 import { convert_to_shape, convert_to_strings, convert_to_labeled_points } from "./stringify.js";
 import { Runner } from "./runner.js";
 import { create_solver, Event, PointInspector, Setter, Solver }from "./solver.js";
-import { makeBrowserRenderer } from "./browserui.js";
+import { bindToggleButton, makeBrowserRenderer } from "./browserui.js";
 
 const vshapes: VisualShape[] = [
     {   // tetra I
@@ -213,20 +213,15 @@ if (!browser) {
         process.exit(1);
     }
 } else {
-    const button:HTMLButtonElement = <HTMLButtonElement> document.getElementById("start");
-    if (button) {
-        button.onclick = function() {
-            if (!state.running()) {
-                solve();
-            } else {
-                state.stop();
-            }
+    const toggled = bindToggleButton(() => {
+        if (!state.running()) {
+            solve();
+        } else {
+            state.stop();
         }
+    });
 
-        state.listener((running) => {
-            button.innerText = running ? "Pause" : "Run ";
-        })
-    }
+    state.listener(toggled);
 }
 
 //# sourceMappingURL=main.js.map

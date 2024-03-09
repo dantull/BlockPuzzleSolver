@@ -1,4 +1,5 @@
 import { Point, LabeledPoints } from "./geometry";
+import { Runner } from "./runner";
 import { PointInspector } from "./solver";
 
 const styles:Map<string, string> = new Map();
@@ -76,5 +77,20 @@ export function makeBrowserRenderer(points:LabeledPoints, onClickBoard:(p:Point)
         }
     } else {
         throw new Error("Could not find canvas for rendering!");
+    }
+}
+
+export function bindToggleButton(fn:() => void):(running:boolean) => undefined {
+    const button:HTMLButtonElement = <HTMLButtonElement> document.getElementById("start");
+    if (button) {
+        button.onclick = function() {
+            fn();
+        }
+
+        return (running:boolean) => {
+            button.innerText = running ? "Pause" : "Run ";
+        };
+    } else {
+        throw new Error("Button not found!");
     }
 }

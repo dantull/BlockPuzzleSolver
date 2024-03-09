@@ -8,7 +8,9 @@ type ScheduleState = {
 export class Runner {
     private state:ScheduleState = {name: "paused"};
 
-    constructor(private callback = (_:boolean) => undefined) {
+    constructor(private callback = (_:boolean) => undefined, 
+        private si:typeof setInterval = setInterval, 
+        private ci:typeof clearInterval = clearInterval) {
     }
 
     stop() {
