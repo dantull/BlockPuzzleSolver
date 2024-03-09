@@ -129,6 +129,7 @@ function makeRenderer() {
     if (browser) {
         return makeBrowserRenderer(labeledPoints, (p:Point) => {
             state.stop();
+            solver = undefined;
             points.push(p);
             
             while (points.length > 3) {
@@ -180,6 +181,10 @@ const callback = (pi:PointInspector, e:Event) => {
 let solver:Solver | undefined;
 
 function process() {
+    if (!state.running()) {
+        return;
+    }
+
     if (!solver) {
         solver = prepareSolver();
     }
