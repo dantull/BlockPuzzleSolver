@@ -180,7 +180,7 @@ const callback = (pi:PointInspector, e:Event) => {
 
 let solver:Solver | undefined;
 
-function process() {
+function loop() {
     if (!state.running()) {
         return;
     }
@@ -198,11 +198,20 @@ function process() {
 }
 
 function solve() {
-    state.start(process);
+    state.start(loop);
 }
 
 if (!browser) {
-    solve();
+    const args = new Set(process.argv);
+    const picked = labeledPoints.filter((lp) => args.has(lp.label));
+    if (picked.length <= 3) {
+        console.log("Picked: " + picked.map((lp) => lp.label).join(", "));
+        picked.forEach((lp) => points.push(lp.point));
+        solve();
+    } else {
+        console.log("Too many arguments (should be 3 or fewer)");
+        process.exit(1);
+    }
 } else {
     const button:HTMLButtonElement = <HTMLButtonElement> document.getElementById("start");
     if (button) {
