@@ -96,7 +96,7 @@ const vboard: string[] = [
 
 const shapes = vshapes.map(convert_to_shape);
 const labeledPoints = convert_to_labeled_points(vboard, 4);
-const board_points = [...labeledPoints.entries()].map(e => e[1]);
+const board_points = labeledPoints.map(e => e.point);
 
 const start = performance.now();
 
@@ -112,7 +112,7 @@ const points:Point[] = [];
 function prepareSolver() {
     return create_solver(board_points, shapes, (set:Setter, pi:PointInspector) => {
         for (let i = 0; i < points.length; i++) {
-            set(points[i], "X");
+            set(points[i], " ");
         }
 
         console.log("Solving for:");
@@ -157,10 +157,7 @@ function makeRenderer() {
 }
 
 const render = makeRenderer();
-
-updateOnClick = render;
-
-updateOnClick((p) => ".");
+updateOnClick = render
 
 let done = false;
 const callback = (pi:PointInspector, e:Event) => {

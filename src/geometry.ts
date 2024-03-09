@@ -1,5 +1,5 @@
 export type Point = { x: number, y: number}
-export type LabeledPoints = Map<string, Point>;
+export type LabeledPoints = { label: string, point: Point }[];
 
 export type ShapeAttrs = {
     chiral: boolean, // whether the piece differs when mirrored

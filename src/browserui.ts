@@ -12,23 +12,42 @@ styles.set("3", "#abdda4");
 styles.set("6", "#66c2a5");
 styles.set("4", "#3288bd");
 styles.set("5", "#5e4fa2");
-styles.set(".", "#cccccc");
+styles.set(" ", "#00000030");
 
+const blank = "#cccccc";
 const SCALE = 25;
 
 class BoardRenderer {
     private ctx:CanvasRenderingContext2D;
+    private width:number;
+    private height:number;
 
-    constructor(canvas:HTMLCanvasElement, private labels:LabeledPoints) {
+    constructor(canvas:HTMLCanvasElement, private points:LabeledPoints, private drawText:boolean = false) {
         this.ctx = canvas.getContext("2d")!;
+        this.width = canvas.width;
+        this.height = canvas.height;
+    }
+
+    drawLabel(label:string, bp:Point) {
+        this.ctx.fillStyle = "#000000";
+        this.ctx.fillText(label, (bp.x + 0.1) * SCALE, (bp.y + 0.5) * SCALE, SCALE * 0.8);
     }
 
     render(pi:PointInspector) {
-        for (let entry of this.labels.entries()) {
-            const [_, bp] = entry;
+        this.ctx.clearRect(0, 0, this.width, this.height);
+
+        for (let entry of this.points) {
+            const bp = entry.point;
+            
             const color = styles.get(pi(bp));
-            this.ctx.fillStyle = color || "#000000";
-            this.ctx.fillRect(bp.x * SCALE, bp.y * SCALE, SCALE, SCALE);
+            if (color || this.drawText) {
+                this.ctx.fillStyle = color || blank;
+                this.ctx.fillRect(bp.x * SCALE, bp.y * SCALE, SCALE, SCALE);
+            }
+            
+            if (this.drawText) {
+                this.drawLabel(entry.label, bp);
+            }
         }
     }
 }
@@ -40,13 +59,18 @@ function board_coords(e:MouseEvent):Point {
 }
 
 export function makeBrowserRenderer(points:LabeledPoints, onClickBoard:(p:Point) => void) {
-    const canvas = <HTMLCanvasElement> document.getElementById("output")
-    if (canvas) {
-        canvas.addEventListener("click", (e:MouseEvent) => {
+    const blocks = <HTMLCanvasElement> document.getElementById("output")
+    const board = <HTMLCanvasElement> document.getElementById("board")
+
+    if (blocks && board) {
+        blocks.addEventListener("click", (e:MouseEvent) => {
             onClickBoard(board_coords(e));
         }, false);
 
-        const renderer = new BoardRenderer(canvas, points);
+        const renderer = new BoardRenderer(blocks, points);
+        const boardRenderer = new BoardRenderer(board, points, true);
+
+        boardRenderer.render((pi) => "."); // one render with all fillable squares
         return (pi:PointInspector) => {
             return renderer.render(pi);
         }

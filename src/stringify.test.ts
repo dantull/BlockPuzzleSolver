@@ -52,22 +52,13 @@ describe("solver", () => {
             "  F  "
         ];
 
-        const lp = convert_to_labeled_points(b, 2);
-
-        expect(lp.size).toEqual(6);
-        expect(lp.get("A")).toEqual({x: 0, y: 0});
-        expect(lp.get("B")).toEqual({x: 1, y: 0});
-        expect(lp.get("C")).toEqual({x: 2, y: 0});
-        expect(lp.get("D")).toEqual({x: 0, y: 1});
-        expect(lp.get("E")).toEqual({x: 2, y: 1});
-        expect(lp.get("F")).toEqual({x: 1, y: 2});
+        expect(convert_to_labeled_points(b, 2)).toEqual([
+            { label: "A", point: {x: 0, y: 0}},
+            { label: "B", point: {x: 1, y: 0}},
+            { label: "C", point: {x: 2, y: 0}},
+            { label: "D", point: {x: 0, y: 1}},
+            { label: "E", point: {x: 2, y: 1}},
+            { label: "F", point: {x: 1, y: 2}}    
+        ]);
     });
-
-    test("duplicate labels detectec", () => {
-        const b = [
-            "ABC",
-            " C"
-        ];
-        expect(() => convert_to_labeled_points(b, 1)).toThrow("'C'");
-    })
 });

@@ -2,10 +2,27 @@
 <head>
 	<title>Calendar Puzzle Solver</title>
 	<script src="main.js" type="module"></script>
+	<style>
+		.wrapper {
+			position: relative;
+			width: 400px;
+			height: 300px;
+		}
+
+		.wrapper canvas {
+			position: absolute;
+			top: 0;
+			left: 0;
+		}
+	</style>
 </head>
 <body>
 	<button id="start" height="80">Start</button><br><br>
-	<canvas id="output" width=400" height="400">
-	</canvas>
+	<div class="wrapper">
+		<canvas id="board" width=400" height="400">
+		</canvas>
+		<canvas id="output" width=400" height="400">
+		</canvas>
+	</div>
 </body>
 </html>
