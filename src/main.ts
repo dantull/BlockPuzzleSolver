@@ -99,34 +99,63 @@ const shapes = vshapes.map(convert_to_shape);
 const labeledPoints = convert_to_labeled_points(vboard, 4);
 const board_points = labeledPoints.map(e => e.point);
 
-const start = performance.now();
-const state = new Runner();
+if (typeof window !== "object") {
+    const args = new Set(process.argv);
+    const picked = labeledPoints.filter((lp) => args.has(lp.label));
+    if (picked.length <= 3) {
+        const start = performance.now();
 
-function logBoard(pi:PointInspector) {
-    console.log(convert_to_strings(board_points, (p) => pi(p) || " ").join('\n'));
-}
-
-const verbose = false;
-
-const points:Point[] = [];
-
-function prepareSolver() {
-    return create_solver(board_points, shapes, (set:Setter, pi:PointInspector) => {
-        for (let i = 0; i < points.length; i++) {
-            set(points[i], " ");
+        console.log("Picked: " + picked.map((lp) => lp.label).join(", "));
+        const solver:Solver = create_solver(board_points, shapes, (set:Setter, pi:PointInspector) => {
+            picked.forEach((lp) => set(lp.point, "X"));
+    
+            console.log("Solving for:");
+            logBoard(pi);
+        });
+    
+        let done = false;
+        let counter = 0;
+        const stepping = 1e5;
+    
+        function logBoard(pi:PointInspector) {
+            console.log(convert_to_strings(board_points, (p) => pi(p) || " ").join('\n'));
         }
+    
+        const verbose = false;
+    
+        const callback = (pi:PointInspector, e:Event) => {
+            if (e.kind === "solved") {
+                console.log("solution:");
+                logBoard(pi);
+                console.log("elapsed time: " + ((performance.now() - start) / 1000));
+                done = true;
+            } else if (verbose && e.kind === "failed") {
+                console.log("failed to place: ");
+                console.log(convert_to_strings(e.shape.points, (p) => "O").join('\n'));
+                console.log("into");
+                logBoard(pi);
+                console.log("--------")
+            }
+    
+            counter++;
+    
+            if (counter % stepping === 0) {
+                console.log(counter / stepping);
+            }
+        }
+    
+        while(!done && solver(callback)) { }
+    } else {
+        console.log("Too many arguments (should be 3 or fewer)");
+        process.exit(1);
+    }
+} else {
+    let onClick:(ps:PointInspector) => void = () => {};
 
-        console.log("Solving for:");
-        logBoard(pi);
-    });
-}
+    let solver:Solver | undefined;
+    const state = new Runner();
 
-const browser = (typeof window === "object");
-
-let updateOnClick:(ps:PointInspector) => void = () => {};
-
-function makeRenderer() {
-    if (browser) {
+    function makeRenderer(points:Point[]) {
         return makeBrowserRenderer(labeledPoints, (p:Point) => {
             state.stop();
             solver = undefined;
@@ -135,8 +164,8 @@ function makeRenderer() {
             while (points.length > 3) {
                 points.shift();
             }
-
-            updateOnClick((p) => {
+    
+            onClick((p) => {
                 if (points.find((v) => v.x === p.x && v.y === p.y)) {
                     return " ";
                 } else {
@@ -145,74 +174,41 @@ function makeRenderer() {
             });
         });
     }
-
-    let counter = 0;
-    const stepping = 1e5;
-
-    return (pi:PointInspector) => {
-        counter++;
-
-        if (counter % stepping === 0) {
-            console.log(counter / stepping);
+    
+    const points:Point[] = [];
+    const render = makeRenderer(points);
+    onClick = render
+    
+    function loop(points:Point[]) {
+        if (!state.running()) {
+            return;
+        }
+    
+        if (!solver) {
+            solver = create_solver(board_points, shapes, (set:Setter, pi:PointInspector) => {
+                for (let i = 0; i < points.length; i++) {
+                    set(points[i], " ");
+                }
+            });
+        }
+    
+        for(let i = 0; i < 50000 && state.running(); i++) {
+            const more = solver && solver((pi, m) => {
+                if (m.kind === "solved") {
+                    state.stop();
+                }
+                render(pi);
+            });
+            if (!more) {
+                state.stop();
+            }
         }
     }
-}
-
-const render = makeRenderer();
-updateOnClick = render
-
-const callback = (pi:PointInspector, e:Event) => {
-    if (e.kind === "solved") {
-        console.log("solution:");
-        logBoard(pi);
-        console.log("elapsed time: " + ((performance.now() - start) / 1000));
-        state.stop();
-    } else if (verbose && e.kind === "failed") {
-        console.log("failed to place: ");
-        console.log(convert_to_strings(e.shape.points, (p) => "O").join('\n'));
-        console.log("into");
-        logBoard(pi);
-        console.log("--------")
+    
+    function solve() {
+        state.start(() => loop(points));
     }
-
-    render(pi);
-}
-
-let solver:Solver | undefined;
-
-function loop() {
-    if (!state.running()) {
-        return;
-    }
-
-    if (!solver) {
-        solver = prepareSolver();
-    }
-
-    for(let i = 0; i < 50000 && state.running(); i++) {
-        const more = solver && solver(callback);
-        if (!more) {
-            state.stop();
-        }
-    }
-}
-
-function solve() {
-    state.start(loop);
-}
-
-if (!browser) {
-    const args = new Set(process.argv);
-    const picked = labeledPoints.filter((lp) => args.has(lp.label));
-    if (picked.length <= 3) {
-        console.log("Picked: " + picked.map((lp) => lp.label).join(", "));
-        picked.forEach((lp) => points.push(lp.point));
-        solve();
-    } else {
-        console.log("Too many arguments (should be 3 or fewer)");
-        process.exit(1);
-    }
-} else {
+    
     const toggled = bindToggleButton(() => {
         if (!state.running()) {
             solve();
