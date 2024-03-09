@@ -3,6 +3,7 @@
 
 import { Point, Shape, VisualShape } from "./geometry.js";
 import { convert_to_shape, convert_to_strings, convert_to_labeled_points } from "./stringify.js";
+import { Runner } from "./runner.js";
 import { create_solver, Event, PointInspector, Setter, Solver }from "./solver.js";
 import { makeBrowserRenderer } from "./browserui.js";
 
@@ -99,13 +100,13 @@ const labeledPoints = convert_to_labeled_points(vboard, 4);
 const board_points = labeledPoints.map(e => e.point);
 
 const start = performance.now();
+const state = new Runner();
 
 function logBoard(pi:PointInspector) {
     console.log(convert_to_strings(board_points, (p) => pi(p) || " ").join('\n'));
 }
 
 const verbose = false;
-let counter = 0;
 
 const points:Point[] = [];
 
@@ -127,7 +128,7 @@ let updateOnClick:(ps:PointInspector) => void = () => {};
 function makeRenderer() {
     if (browser) {
         return makeBrowserRenderer(labeledPoints, (p:Point) => {
-            solver = undefined;
+            state.stop();
             points.push(p);
             
             while (points.length > 3) {
@@ -159,45 +160,6 @@ function makeRenderer() {
 const render = makeRenderer();
 updateOnClick = render
 
-type ScheduleState = {
-    name: "running",
-    handle: number | NodeJS.Timeout
-} | {
-    name: "paused"
-};
-
-class Runner {
-    private state:ScheduleState = {name: "paused"};
-
-    constructor(private callback = (_:boolean) => undefined) {
-    }
-
-    stop() {
-        if (this.state.name === "running") {
-            clearInterval(this.state.handle);
-        }
-
-        this.state = {name: "paused"}
-        this.callback(this.running())
-    }
-
-    start(fn:() => void) {
-        this.state = {name: "running", handle: setInterval(fn, 0)}
-        this.callback(this.running())
-    }
-
-    running():boolean {
-        return this.state.name === "running";
-    }
-
-    listener(callback:(running:boolean) => undefined) {
-        this.callback = callback;
-        this.callback(this.running());
-    }
-}
-
-const state = new Runner();
-
 const callback = (pi:PointInspector, e:Event) => {
     if (e.kind === "solved") {
         console.log("solution:");
@@ -223,7 +185,7 @@ function process() {
     }
 
     for(let i = 0; i < 50000 && state.running(); i++) {
-        const more = solver(callback);
+        const more = solver && solver(callback);
         if (!more) {
             state.stop();
         }
