@@ -159,13 +159,51 @@ function makeRenderer() {
 const render = makeRenderer();
 updateOnClick = render
 
-let done = false;
+type ScheduleState = {
+    name: "running",
+    handle: number | NodeJS.Timeout
+} | {
+    name: "paused"
+};
+
+class Runner {
+    private state:ScheduleState = {name: "paused"};
+
+    constructor(private callback = (_:boolean) => undefined) {
+    }
+
+    stop() {
+        if (this.state.name === "running") {
+            clearInterval(this.state.handle);
+        }
+
+        this.state = {name: "paused"}
+        this.callback(this.running())
+    }
+
+    start(fn:() => void) {
+        this.state = {name: "running", handle: setInterval(fn, 0)}
+        this.callback(this.running())
+    }
+
+    running():boolean {
+        return this.state.name === "running";
+    }
+
+    listener(callback:(running:boolean) => undefined) {
+        this.callback = callback;
+        this.callback(this.running());
+    }
+}
+
+const state = new Runner();
+
 const callback = (pi:PointInspector, e:Event) => {
     if (e.kind === "solved") {
         console.log("solution:");
         logBoard(pi);
         console.log("elapsed time: " + ((performance.now() - start) / 1000));
-        done = true // solution found
+        state.stop();
     } else if (verbose && e.kind === "failed") {
         console.log("failed to place: ");
         console.log(convert_to_strings(e.shape.points, (p) => "O").join('\n'));
@@ -177,13 +215,6 @@ const callback = (pi:PointInspector, e:Event) => {
     render(pi);
 }
 
-let handle:number | undefined | NodeJS.Timeout;
-
-function stop() {
-    clearInterval(handle);
-    handle = undefined;
-}
-
 let solver:Solver | undefined;
 
 function process() {
@@ -191,20 +222,16 @@ function process() {
         solver = prepareSolver();
     }
 
-    for(let i = 0; i < 50000 && !done; i++) {
+    for(let i = 0; i < 50000 && state.running(); i++) {
         const more = solver(callback);
         if (!more) {
-            done = true;
+            state.stop();
         }
-    }
-
-    if (done && handle !== undefined) {
-        stop();
     }
 }
 
 function solve() {
-    handle = setInterval(process, 0)
+    state.start(process);
 }
 
 if (!browser) {
@@ -213,15 +240,17 @@ if (!browser) {
     const button:HTMLButtonElement = <HTMLButtonElement> document.getElementById("start");
     if (button) {
         button.onclick = function() {
-            if (handle === undefined) {
-                done = false;
+            if (!state.running()) {
                 solve();
-                button.innerText = "Pause";
             } else {
-                stop();
-                button.innerText = "Start";
+                state.stop();
             }
         }
+
+        state.listener((running) => {
+            button.innerText = running ? "Pause" : "Run ";
+        })
     }
 }
+
 //# sourceMappingURL=main.js.map
