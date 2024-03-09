@@ -192,7 +192,10 @@ function process() {
     }
 
     for(let i = 0; i < 50000 && !done; i++) {
-        done = !solver(callback);
+        const more = solver(callback);
+        if (!more) {
+            done = true;
+        }
     }
 
     if (done && handle !== undefined) {
