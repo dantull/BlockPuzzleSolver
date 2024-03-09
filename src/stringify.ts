@@ -1,17 +1,36 @@
-import { Point, Shape, VisualShape } from "./geometry.js";
+import { LabeledPoints, Point, Shape, VisualShape } from "./geometry.js";
 
-export function convert_to_points(shape: string[]): Point[] {
+export function convert_to_points(shape: string[], blank:string = " "): Point[] {
     const points:Point[] = [];
-    for (var y = 0; y < shape.length; y++) {
+    for (let y = 0; y < shape.length; y++) {
         const line = shape[y];
-        for (var x = 0; x < line.length; x++) {
-            if (line.charAt(x) !== " ") {
+        for (let x = 0; x < line.length; x++) {
+            if (line.charAt(x) !== blank) {
                 points.push({x, y});
             }
         }
     }
 
     return points; 
+}
+
+export function convert_to_labeled_points(shape: string[], width: number):LabeledPoints {
+    const res:LabeledPoints = new Map();
+    for (let y = 0; y < shape.length; y++) {
+        const line = shape[y];
+        const row = Math.ceil(line.length / width);
+
+        for (let x = 0; x < row; x++) {
+            const label = line.substring(x * width, (x + 1) * width).trim();
+            if (label.length > 0) {
+                if (res.has(label)) {
+                    throw new Error(`Duplicate label '${label}' at (${x}, ${y})`);
+                }
+                res.set(label, {x: x, y: y});
+            }
+        }
+    }
+    return res;
 }
 
 export function bounds(ps: Point[]): [Point, Point] {
