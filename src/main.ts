@@ -190,12 +190,20 @@ if (typeof window !== "object") {
             });
         }
     
+        let t = performance.now();
         for(let i = 0; i < 50000 && state.running(); i++) {
             const more = solver && solver((pi, m) => {
                 if (m.kind === "solved") {
+                    render(pi);
                     state.stop();
+                } else {
+                    let nt = performance.now()
+                    let dt = nt - t;
+                    if (dt > 1000/120) {
+                        render(pi);
+                        t = nt;
+                    }
                 }
-                render(pi);
             });
             if (!more) {
                 state.stop();
