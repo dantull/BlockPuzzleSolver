@@ -67,7 +67,7 @@ class ShapeState {
     constructor(public shape: Shape, private baseVariants:Point[][], private points:Point[]) {
     }
 
-    step(board:Board, si:number) {
+    step(board:Board, si:number, minSize:number) {
         if (this.remove) {
             this.remove();
             this.remove = false;
@@ -84,7 +84,12 @@ class ShapeState {
 
             this.vi++;
         } else if (this.vi === this.baseVariants.length) {
-            this.pi++;
+            const p = this.points[this.pi];
+            if (board.reachable(p, minSize) < minSize) {
+                this.pi = this.points.length;
+            } else {
+                this.pi++;
+            }
             this.vi = 0;
         }
 
@@ -108,6 +113,7 @@ export function create_solver(board_points: Point[], shapes: Shape[], setup_call
 
     let stack: ShapeState[] = [];
     let allBaseVariants: Point[][][] = shapes.map(variants);
+    let smallestShapeSize = Math.min(...shapes.map((s) => s.points.length));
 
     const nextShape = () => new ShapeState(shapes[stack.length], allBaseVariants[stack.length], board.remaining());
 
@@ -120,7 +126,7 @@ export function create_solver(board_points: Point[], shapes: Shape[], setup_call
             return false;
         }
 
-        const more = ss.step(board, stack.length - 1);
+        const more = ss.step(board, stack.length - 1, smallestShapeSize);
 
         if (!more) {
             if (ss.noplace()) {
