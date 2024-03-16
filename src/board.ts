@@ -6,6 +6,19 @@ function encode(p:Point): pe {
     return p.x * 16 + p.y;
 }
 
+const fillable:string = ".";
+
+const dirs = [
+    {x: 0, y: -1},
+    {x: 0, y: 1},
+    {x: -1, y: 0},
+    {x: 1, y: 0}
+];
+
+function add(a:Point, b:Point) {
+    return {x: a.x + b.x, y: a.y + b.y}
+}
+
 export class Board {
     private filled:Map<pe, string>;
     private unfilled:Set<pe>;
@@ -19,6 +32,29 @@ export class Board {
         
         this.filled = new Map();
         this.all = ps;
+    }
+
+    private spread(ps:Point, limit:number, accum:Set<pe>) {
+        const ep = encode(ps);
+
+        if (accum.size < limit && this.unfilled.has(ep) && !accum.has(ep)) {
+            accum.add(ep);
+
+            for (const d of dirs) {
+                this.spread(add(ps, d), limit, accum);
+
+                if (accum.size === limit) {
+                    break;
+                }
+            }
+        }
+    }
+
+    reachable(ps:Point, limit:number):number {
+        const reached = new Set<pe>();
+        this.spread(ps, limit, reached);
+
+        return reached.size;
     }
 
     fill(ps:Point[], marker:string) {
@@ -47,7 +83,7 @@ export class Board {
     at(p:Point) {
         const ep = encode(p);
         if (this.unfilled.has(ep)) {
-            return "."; // fillable square
+            return fillable; // fillable square
         }
 
         return this.filled.get(encode(p)) || ' ';
