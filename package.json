@@ -8,7 +8,7 @@
     "build": "tsc && cp res/index.html dist",
     "clean": "rm -fR dist/",
     "watch": "tsc --watch",
-    "main": "node dist/main.js",
+    "main": "node dist/nodemain.js",
     "serve": "http-server ./dist",
     "test": "jest"
   },
