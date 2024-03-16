@@ -150,12 +150,12 @@ if (typeof window !== "object") {
         process.exit(1);
     }
 } else {
-    let onClick:(ps:PointInspector) => void = () => {};
-
+    let render:(ps:PointInspector) => void = () => {};
     let solver:Solver | undefined;
     const state = new Runner();
+    const points:Point[] = [];
 
-    function makeRenderer(points:Point[]) {
+    function makeRenderer() {
         return makeBrowserRenderer(labeledPoints, (p:Point) => {
             state.stop();
             solver = undefined;
@@ -165,7 +165,7 @@ if (typeof window !== "object") {
                 points.shift();
             }
     
-            onClick((p) => {
+            render((p) => {
                 if (points.find((v) => v.x === p.x && v.y === p.y)) {
                     return " ";
                 } else {
@@ -175,11 +175,9 @@ if (typeof window !== "object") {
         });
     }
     
-    const points:Point[] = [];
-    const render = makeRenderer(points);
-    onClick = render
+    render = makeRenderer();
     
-    function loop(points:Point[]) {
+    function loop() {
         if (!state.running()) {
             return;
         }
@@ -206,7 +204,7 @@ if (typeof window !== "object") {
     }
     
     function solve() {
-        state.start(() => loop(points));
+        state.start(() => loop());
     }
     
     const toggled = bindToggleButton(() => {
