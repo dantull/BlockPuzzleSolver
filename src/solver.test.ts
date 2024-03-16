@@ -28,7 +28,7 @@ describe("solver", () => {
             setup_calls++;
 
             for (let bp of board) {
-                expect(pi(bp)).toEqual(".");
+                expect(pi(bp)).toEqual(undefined);
             }
 
             expect(pi({x: -1, y: -1})).toEqual(" ")
@@ -148,7 +148,7 @@ describe("solver", () => {
         let called = false;
         create_solver(board, [], (s, pi) => {
             const p = {x: 0, y: 1};
-            expect(pi(p)).toEqual('.');
+            expect(pi(p)).toEqual(undefined);
             s(p, "X");
             expect(pi(p)).toEqual('X');
             called = true;

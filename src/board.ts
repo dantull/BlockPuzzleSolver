@@ -6,8 +6,6 @@ function encode(p:Point): pe {
     return p.x * 16 + p.y;
 }
 
-const fillable:string = ".";
-
 const dirs = [
     {x: 0, y: -1},
     {x: 0, y: 1},
@@ -83,7 +81,7 @@ export class Board {
     at(p:Point) {
         const ep = encode(p);
         if (this.unfilled.has(ep)) {
-            return fillable; // fillable square
+            return undefined; // fillable square
         }
 
         return this.filled.get(encode(p)) || ' ';

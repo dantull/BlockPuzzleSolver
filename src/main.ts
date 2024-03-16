@@ -118,7 +118,7 @@ if (typeof window !== "object") {
         const stepping = 1e5;
     
         function logBoard(pi:PointInspector) {
-            console.log(convert_to_strings(board_points, (p) => pi(p) || " ").join('\n'));
+            console.log(convert_to_strings(board_points, (p) => pi(p) || ".").join('\n'));
         }
     
         const verbose = false;
@@ -169,7 +169,7 @@ if (typeof window !== "object") {
                 if (points.find((v) => v.x === p.x && v.y === p.y)) {
                     return " ";
                 } else {
-                    return ".";
+                    return undefined;
                 }
             });
         });

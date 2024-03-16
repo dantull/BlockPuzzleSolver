@@ -40,7 +40,7 @@ class BoardRenderer {
         for (let entry of this.points) {
             const bp = entry.point;
             
-            const color = styles.get(pi(bp));
+            const color = styles.get(pi(bp) || blank);
             if (color || this.drawText) {
                 this.ctx.fillStyle = color || blank;
                 this.ctx.fillRect(bp.x * SCALE, bp.y * SCALE, SCALE, SCALE);
@@ -71,7 +71,7 @@ export function makeBrowserRenderer(points:LabeledPoints, onClickBoard:(p:Point)
         const renderer = new BoardRenderer(blocks, points);
         const boardRenderer = new BoardRenderer(board, points, true);
 
-        boardRenderer.render((pi) => "."); // one render with all fillable squares
+        boardRenderer.render((pi) => undefined); // one render with all fillable squares
         return (pi:PointInspector) => {
             return renderer.render(pi);
         }

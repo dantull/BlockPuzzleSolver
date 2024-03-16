@@ -55,7 +55,7 @@ function offsetAll(ps:Point[], at:Point): Point[] {
 
 export type Event = { kind: "placed" | "failed" | "solved", shape: Shape }
 export type Solver = (callback:(pi:PointInspector, m:Event) => void) => boolean
-export type PointInspector = (p:Point) => string
+export type PointInspector = (p:Point) => string | undefined
 export type Setter = (p:Point, m:string) => void
 
 class ShapeState {
