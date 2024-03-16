@@ -5,76 +5,85 @@ const vshapes: VisualShape[] = [
     {   // tetra I
         chiral: false,
         rotations: 1,
-        points: [   
-        "OOOO"
+        points: [
+            "OOOO"
         ]
     },
     {   // tetra L/J
         chiral: true,
         rotations: 3,
         points: [
-        "OOO",
-        "O"
-    ]},
+            "OOO",
+            "O"
+        ]
+    },
     {   // tetra S/Z
         chiral: true,
         rotations: 1,
-        points: [   
-        "OO",
-        " OO"
-    ]},
+        points: [
+            "OO",
+            " OO"
+        ]
+    },
     {   // penta L/Q
         chiral: true,
         rotations: 3,
         points: [
-        "OOOO",
-        "O"
-    ]},
+            "OOOO",
+            "O"
+        ]
+    },
     {   // penta N/S
         chiral: true,
         rotations: 3,
         points: [
-        "OOO",
-        "  OO"
-    ]},
+            "OOO",
+            "  OO"
+        ]
+    },
     {   // penta U
         chiral: false,
         rotations: 3,
         points: [
-        "OOO",
-        "O O"
-    ]},
+            "OOO",
+            "O O"
+        ]
+    },
     {   // penta T
         chiral: false,
         rotations: 3,
         points: [
-        "OOO",
-        " O",
-        " O"
-    ]},
+            "OOO",
+            " O",
+            " O"
+        ]
+    },
     {   // penta P
         chiral: true,
         rotations: 3,
         points: [
-        "OOO",
-        "OO"
-    ]},
+            "OOO",
+            "OO"
+        ]
+    },
     {   // penta V
         chiral: false,
         rotations: 3,
         points: [
-        "OOO",
-        "O",
-        "O"
-    ]},
+            "OOO",
+            "O",
+            "O"
+        ]
+    },
     {   // penta Z
         chiral: true,
         rotations: 1,
         points: [
-        "OO",
-        " O",
-        " OO"
-    ]},
+            "OO",
+            " O",
+            " OO"
+        ]
+    },
 ];
 
 // Board is shaped like this:
