@@ -55,10 +55,19 @@ export function convert_to_strings(ps:Point[], to_char:(p:Point) => string): str
     return grid.map((cs) => cs.join(""));
 }
 
+// used to zero out shape coordinates so the first point is always (0, 0)
+// which is important for the solver's iteration
+function subtract(p1:Point, p2:Point):Point {
+    return {x: p1.x - p2.x, y: p1.y - p2.y}
+}
+
 export function convert_to_shape(vs: VisualShape): Shape {
+    const points = convert_to_points(vs.points);
+    const first = points[0];
+
     return {
         chiral: vs.chiral,
         rotations: vs.rotations,
-        points: convert_to_points(vs.points)
+        points: points.map((p) => subtract(p, first))
     }
 }

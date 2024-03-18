@@ -94,7 +94,7 @@ if (worker.isMainThread) {
     const task = worker.workerData as WorkerTask;
     const solver:Solver = create_solver(task.board_points, task.shapes, (set:Setter, pi:PointInspector) => {
         task.picked.forEach((p) => set(p, "X"));
-        task.placed.forEach((p) => set(p, task.shapes.length + ""));
+        task.placed.forEach((p) => set(p, "!"));
 
         if (task.verbose) {
             console.log(`Worker ${task.id} Solving for: \n${toString(pi)}`);

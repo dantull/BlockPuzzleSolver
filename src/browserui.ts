@@ -1,10 +1,11 @@
 import { Point, LabeledPoints } from "./geometry";
-import { Runner } from "./runner";
 import { PointInspector } from "./solver";
 
 const styles:Map<string, string> = new Map();
 styles.set("0", "#9e0142");
 styles.set("9", "#d53e4f");
+styles.set("A", "#408840");
+styles.set("B", "#004088");
 styles.set("1", "#f46d43");
 styles.set("8", "#fdae61");
 styles.set("2", "#fee08b");

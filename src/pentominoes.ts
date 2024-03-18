@@ -46,7 +46,7 @@ export const P:VisualShape = Object.freeze({
     ]
 });
 
-export const V:VisualShape = Object.freeze({   // penta V
+export const V:VisualShape = Object.freeze({
     chiral: false,
     rotations: 3,
     points: [
@@ -66,8 +66,55 @@ export const Z:VisualShape = Object.freeze({
     ]
 });
 
-export const F = Object.freeze({});
-export const W = Object.freeze({});
-export const X = Object.freeze({});
-export const Y = Object.freeze({});
-export const I = Object.freeze({});
+export const F:VisualShape = Object.freeze({
+    chiral: true,
+    rotations: 3,
+    points: [
+        "OO",
+        " OO",
+        " O"
+    ]
+});
+
+export const W:VisualShape = Object.freeze({
+    chiral: false,
+    rotations: 3,
+    points: [
+        "OO",
+        " OO",
+        "  O"
+    ]
+});
+
+export const X:VisualShape = Object.freeze({
+    chiral: false,
+    rotations: 0,
+    points: [
+        " O",
+        "OOO",
+        " O"
+    ]
+});
+
+export const Y:VisualShape = Object.freeze({
+    chiral: true,
+    rotations: 3,
+    points: [
+        "O",
+        "O",
+        "OO",
+        "O"
+    ]
+});
+
+export const I:VisualShape = Object.freeze({
+    chiral: false,
+    rotations: 1,
+    points: [
+        "O",
+        "O",
+        "O",
+        "O",
+        "O"
+    ]
+});

@@ -58,6 +58,8 @@ export type Solver = (callback:(pi:PointInspector, m:Event) => void) => boolean
 export type PointInspector = (p:Point) => string | undefined
 export type Setter = (p:Point, m:string) => void
 
+const chars = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F", "G"];
+
 class ShapeState {
     private pi: number = 0;
     private vi = 0;
@@ -76,7 +78,7 @@ class ShapeState {
         if (this.vi < this.baseVariants.length) {
             const v = offsetAll(this.baseVariants[this.vi], this.points[this.pi]);
 
-            this.remove = board.fill(v, si + "");
+            this.remove = board.fill(v, chars[si]);
 
             if (this.remove) {
                 this.places++;
