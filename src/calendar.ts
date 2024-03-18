@@ -1,5 +1,6 @@
-import { LabeledPoints, Point, Shape, VisualShape } from "./geometry.js";
-import { convert_to_shape, convert_to_strings, convert_to_labeled_points } from "./stringify.js";
+import { VisualShape } from "./geometry.js";
+import { convert_to_shape, convert_to_labeled_points } from "./stringify.js";
+import { L, N, U, T, P, V, Z } from "./pentominoes.js";
 
 const vshapes: VisualShape[] = [
     {   // tetra I
@@ -25,65 +26,7 @@ const vshapes: VisualShape[] = [
             " OO"
         ]
     },
-    {   // penta L/Q
-        chiral: true,
-        rotations: 3,
-        points: [
-            "OOOO",
-            "O"
-        ]
-    },
-    {   // penta N/S
-        chiral: true,
-        rotations: 3,
-        points: [
-            "OOO",
-            "  OO"
-        ]
-    },
-    {   // penta U
-        chiral: false,
-        rotations: 3,
-        points: [
-            "OOO",
-            "O O"
-        ]
-    },
-    {   // penta T
-        chiral: false,
-        rotations: 3,
-        points: [
-            "OOO",
-            " O",
-            " O"
-        ]
-    },
-    {   // penta P
-        chiral: true,
-        rotations: 3,
-        points: [
-            "OOO",
-            "OO"
-        ]
-    },
-    {   // penta V
-        chiral: false,
-        rotations: 3,
-        points: [
-            "OOO",
-            "O",
-            "O"
-        ]
-    },
-    {   // penta Z
-        chiral: true,
-        rotations: 1,
-        points: [
-            "OO",
-            " O",
-            " OO"
-        ]
-    },
+    L, N, U, T, P, V, Z
 ];
 
 // Board is shaped like this:
