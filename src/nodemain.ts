@@ -9,6 +9,7 @@ import { definitions } from "./calendar.js";
 
 type WorkerTask = {
     id: number,
+    verbose: boolean,
     placed: Point[],
     picked: Point[],
     shapes: Shape[],
@@ -31,15 +32,16 @@ function logBoard(pi:PointInspector) {
     console.log(toString(pi));
 }
 
-const verbose = false;
-
 if (worker.isMainThread) {
     const args = new Set(process.argv);
+    const verbose = args.has("verbose");
+
     const picked = defs.labels.filter((lp) => args.has(lp.label));
+    const many = args.has("many");
     if (picked.length <= 3) {
         const start = performance.now();
 
-        console.log("Picked: " + picked.map((lp) => lp.label).join(", "));
+        console.log(`Picked: ${picked.map((lp) => lp.label).join(", ")}`);
         const solver:Solver = create_solver(defs.board, defs.shapes.slice(0, 1), (set:Setter, pi:PointInspector) => {
             picked.forEach((lp) => set(lp.point, "X"));
     
@@ -47,23 +49,16 @@ if (worker.isMainThread) {
             logBoard(pi);
         });
 
-        let counter = 0;
-        const stepping = 1e5;
-    
         let id = 0;
         const remainingShapes = defs.shapes.slice(1);
 
         const callback = (pi:PointInspector, e:Event) => {
             if (e.kind === "solved") {
-                if (verbose) {
-                    console.log("solution:");
-                    logBoard(pi);
-                    console.log("elapsed time: " + ((performance.now() - start) / 1000));
-                }
                 const piece = defs.board.filter(p => pi(p) === '0');
 
                 const task:WorkerTask = {
                     id: id++,
+                    verbose,
                     placed: piece,
                     picked: picked.map(lp => lp.point),
                     shapes: remainingShapes,
@@ -75,28 +70,20 @@ if (worker.isMainThread) {
                 });
 
                 w.on("message", (sln:Solution) => {
-                    console.log("Worker: " + sln.id + "\n" + sln.text + "\n");
-                    // process.exit(0);
+                    console.log(`Worker: ${sln.id}\n${sln.text}\n`);
+                    console.log(`Elapsed: ${(performance.now() - start) / 1000}`);
+
+                    if (!many) {
+                        process.exit(0); // stop after first
+                    }
                 });
-            } else if (verbose && e.kind === "failed") {
-                console.log("failed to place: ");
-                console.log(convert_to_strings(e.shape.points, (p) => "O").join('\n'));
-                console.log("into");
-                logBoard(pi);
-                console.log("--------")
-            }
-    
-            counter++;
-    
-            if (counter % stepping === 0) {
-                console.log(counter / stepping);
             }
         }
     
         while(solver(callback)) { }
 
         if (verbose) {
-            console.log("done spawning workers");
+            console.log(`spawned ${id} workers`);
         }
 
     } else {
@@ -105,16 +92,12 @@ if (worker.isMainThread) {
     }
 } else {
     const task = worker.workerData as WorkerTask;
-    if (verbose) {
-        console.log("in Worker: " + task.id);
-    }
     const solver:Solver = create_solver(task.board_points, task.shapes, (set:Setter, pi:PointInspector) => {
         task.picked.forEach((p) => set(p, "X"));
         task.placed.forEach((p) => set(p, task.shapes.length + ""));
 
-        if (verbose) {
-            console.log("Solving for:");
-            logBoard(pi);
+        if (task.verbose) {
+            console.log(`Worker ${task.id} Solving for: \n${toString(pi)}`);
         }
     });
 
@@ -133,7 +116,7 @@ if (worker.isMainThread) {
 
     while(solver(callback)) { }
 
-    if (verbose) {
-        console.log("Worker " + task.id + " finished.");
+    if (task.verbose) {
+        console.log(`Worker ${task.id} finished.`);
     }
 }
