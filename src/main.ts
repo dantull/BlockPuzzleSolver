@@ -15,7 +15,7 @@ const state = new Runner();
 const points:Point[] = [];
 
 function makeRenderer() {
-    return makeBrowserRenderer(defs.labels, (p:Point) => {
+    return makeBrowserRenderer(defs.labels, defs.shapes, (p:Point) => {
         state.stop();
         solver = undefined;
         points.push(p);
