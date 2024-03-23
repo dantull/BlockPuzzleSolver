@@ -1,4 +1,4 @@
-import { VisualShape } from "./geometry.js";
+import { LabeledShapes, VisualShape } from "./geometry.js";
 import { convert_to_shape, convert_to_labeled_points } from "./stringify.js";
 import { L, N, U, T, P, V, Z } from "./pentominoes.js";
 
@@ -41,7 +41,12 @@ const vboard: string[] = [
     "                Thu Fri Sat"
 ];
 
-const shapes = vshapes.map(convert_to_shape);
+const shapes:LabeledShapes = {};
+
+for (let i = 0; i < vshapes.length; i++) {
+    shapes[i + ""] = convert_to_shape(vshapes[i]);
+}
+
 const labels = convert_to_labeled_points(vboard, 4);
 const board = labels.map(e => e.point);
 

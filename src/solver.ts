@@ -1,5 +1,5 @@
 import { Board } from "./board.js";
-import { Point, Shape } from "./geometry.js";
+import { LabeledShapes, Point, Shape } from "./geometry.js";
 
 // negative 0 is weird, avoid it
 const neg = (x:number) => x === 0 ? x : -x;
@@ -58,15 +58,13 @@ export type Solver = (callback:(pi:PointInspector, m:Event) => void) => boolean
 export type PointInspector = (p:Point) => string | undefined
 export type Setter = (p:Point, m:string) => void
 
-const chars = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F", "G"];
-
 class ShapeState {
     private pi: number = 0;
     private vi = 0;
     private remove: (() => void) | false = false;
     private places: number = 0;
 
-    constructor(public shape: Shape, private baseVariants:Point[][], private points:Point[]) {
+    constructor(public shape: Shape, private label:string, private baseVariants:Point[][], private points:Point[]) {
     }
 
     step(board:Board, si:number, minSize:number) {
@@ -78,7 +76,7 @@ class ShapeState {
         if (this.vi < this.baseVariants.length) {
             const v = offsetAll(this.baseVariants[this.vi], this.points[this.pi]);
 
-            this.remove = board.fill(v, chars[si]);
+            this.remove = board.fill(v, this.label);
 
             if (this.remove) {
                 this.places++;
@@ -107,19 +105,39 @@ class ShapeState {
     }
 }
 
-export function create_solver(board_points: Point[], shapes: Shape[], setup_callback:((s:Setter, pi:PointInspector) => void)):Solver {
+type ShapeInfo = {
+    label: string,
+    shape: Shape,
+    variants: Point[][]
+};
+
+export function create_solver(board_points: Point[], labeled_shapes: LabeledShapes, setup_callback:((s:Setter, pi:PointInspector) => void)):Solver {
     const board = new Board(board_points);
     const pi = (p:Point) => board.at(p)
 
     setup_callback((p, m) => board.fill([p], m), pi);
 
+    const shapes:ShapeInfo[] = [];
+    for (const label in labeled_shapes) {
+        const shape = labeled_shapes[label];
+        shapes.push({
+            label,
+            shape,
+            variants: variants(shape)
+        })
+    }
+
     let stack: ShapeState[] = [];
-    let allBaseVariants: Point[][][] = shapes.map(variants);
-    let smallestShapeSize = Math.min(...shapes.map((s) => s.points.length));
+    let smallestShapeSize = Math.min(...shapes.map((info) => info.shape.points.length));
 
-    const nextShape = () => new ShapeState(shapes[stack.length], allBaseVariants[stack.length], board.remaining());
+    const nextShape = () => {
+        const s = shapes[stack.length];
+        return new ShapeState(s.shape, s.label, s.variants, board.remaining());
+    }
 
-    stack.push(nextShape());
+    if (shapes.length > 0) {
+        stack.push(nextShape());
+    }
 
     return (cb) => {
         let ss = stack[stack.length - 1];

@@ -1,4 +1,4 @@
-import { LabeledPoints, Point, Shape } from "./geometry.js";
+import { LabeledPoints, LabeledShapes, Point, Shape } from "./geometry.js";
 import { convert_to_strings } from "./stringify.js";
 import { create_solver, Event, PointInspector, Setter, Solver }from "./solver.js";
 
@@ -12,7 +12,7 @@ type WorkerTask = {
     verbose: boolean,
     placed: Point[],
     picked: Point[],
-    shapes: Shape[],
+    shapes: LabeledShapes,
     board_points: Point[]
 };
 
@@ -32,7 +32,26 @@ function logBoard(pi:PointInspector) {
     console.log(toString(pi));
 }
 
+function split<T>(r:Record<string, T>):[string | undefined, r1:Record<string, T>, r2:Record<string, T>] {
+    const r1:Record<string, T> = { };
+    const r2:Record<string, T> = { };
+    let once = undefined;
+
+    for (const k in r) {
+        if (!once) {
+            r1[k] = r[k];
+            once = k;
+        } else {
+            r2[k] = r[k];
+        }
+    }
+
+    return [once, r1, r2];
+}
+
 if (worker.isMainThread) {
+    const [k, first, rest] = split(defs.shapes);
+
     const args = new Set(process.argv);
     const verbose = args.has("verbose");
 
@@ -42,7 +61,7 @@ if (worker.isMainThread) {
         const start = performance.now();
 
         console.log(`Picked: ${picked.map((lp) => lp.label).join(", ")}`);
-        const solver:Solver = create_solver(defs.board, defs.shapes.slice(0, 1), (set:Setter, pi:PointInspector) => {
+        const solver:Solver = create_solver(defs.board, first, (set:Setter, pi:PointInspector) => {
             picked.forEach((lp) => set(lp.point, "X"));
     
             console.log("Solving for:");
@@ -50,11 +69,11 @@ if (worker.isMainThread) {
         });
 
         let id = 0;
-        const remainingShapes = defs.shapes.slice(1);
+        const remainingShapes = rest;
 
         const callback = (pi:PointInspector, e:Event) => {
             if (e.kind === "solved") {
-                const piece = defs.board.filter(p => pi(p) === '0');
+                const piece = defs.board.filter(p => pi(p) === k);
 
                 const task:WorkerTask = {
                     id: id++,

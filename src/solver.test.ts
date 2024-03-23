@@ -24,7 +24,7 @@ describe("solver", () => {
         };
         
         let setup_calls = 0;
-        const solver = create_solver(board, [shape], (s, pi) => {
+        const solver = create_solver(board, {"0": shape}, (s, pi) => {
             setup_calls++;
 
             for (let bp of board) {
@@ -102,7 +102,7 @@ describe("solver", () => {
                 rotations: c.rotations
             };
 
-            const solver = create_solver(board, [shape], (s, pi) => {});
+            const solver = create_solver(board, {"0": shape}, (s, pi) => {});
             let events:Event[] = [];
 
             while(solver((pi, e) => {
@@ -126,7 +126,7 @@ describe("solver", () => {
             rotations: 3
         };
 
-        const solver = create_solver(board, [shape, shape], (s, pi) => {});
+        const solver = create_solver(board, {"0": shape, "1":shape}, (s, pi) => {});
         let events:Map<string, number> = new Map();
         events.set("solved", 0);
         events.set("failed", 0);
@@ -146,7 +146,7 @@ describe("solver", () => {
     test("solver with setup square filling", () => {
         const board = point_rectangle(2, 2);
         let called = false;
-        create_solver(board, [], (s, pi) => {
+        create_solver(board, {}, (s, pi) => {
             const p = {x: 0, y: 1};
             expect(pi(p)).toEqual(undefined);
             s(p, "X");
